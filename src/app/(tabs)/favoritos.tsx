@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native';
 
-import { PosterCard, Screen, SectionHeader } from '@/src/components/ui';
+import { PosterCard, Screen, SectionHeader } from '@/src/components';
 import { contentLibrary } from '@/src/data/content';
 import { theme } from '@/theme';
 

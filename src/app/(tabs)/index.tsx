@@ -1,6 +1,6 @@
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { Chip, HeroCard, HorizontalRail, Screen, SectionHeader } from '@/src/components/ui';
+import { Chip, HeroCard, HorizontalRail, Screen, SectionHeader } from '@/src/components';
 import { contentLibrary } from '@/src/data/content';
 import { theme } from '@/theme';
 
@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   brand: {
-    color: theme.colors.text,
+    color: theme.colors.primary,
     fontSize: 34,
     fontWeight: theme.fonts.bold,
   },

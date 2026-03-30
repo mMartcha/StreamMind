@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
 
-import { PosterCard, Screen, SectionHeader } from '@/src/components/ui';
+import { PosterCard, Screen, SectionHeader } from '@/src/components';
 import { aiConversation, contentLibrary } from '@/src/data/content';
 import { theme } from '@/theme';
 

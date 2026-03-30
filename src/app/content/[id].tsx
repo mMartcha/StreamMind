@@ -3,7 +3,7 @@ import { Image } from 'expo-image';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { HorizontalRail, SectionHeader, StreamingRow } from '@/src/components/ui';
+import { HorizontalRail, SectionHeader, StreamingRow } from '@/src/components';
 import { contentLibrary } from '@/src/data/content';
 import { theme } from '@/theme';
 
@@ -32,7 +32,7 @@ export default function ContentDetailsScreen() {
             <Text style={styles.meta}>
               {item.type} • {item.year} • {item.duration}
             </Text>
-            <Text style={styles.genres}>{item.genre.join(' • ')}</Text>
+            <Text style={styles.genres}>{item.genre.join('  •  ')}</Text>
           </View>
         </View>
 

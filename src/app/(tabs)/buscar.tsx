@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
-import { Chip, PosterCard, Screen, SectionHeader } from '@/src/components/ui';
+import { Chip, PosterCard, Screen, SectionHeader } from '@/src/components';
 import { contentLibrary, genres } from '@/src/data/content';
 import { theme } from '@/theme';
 import React from 'react';
