@@ -1,4 +1,6 @@
-import { StyleSheet, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText, Chip, PosterCard, Screen, SectionHeader } from '@/src/components';
 import { contentLibrary } from '@/src/data/content';
@@ -9,6 +11,8 @@ const favorites = contentLibrary.filter((item) => item.favorite);
 const watchLater = contentLibrary.filter((item) => item.watchLater);
 
 export default function ProfileScreen() {
+  const router = useRouter();
+
   return (
     <Screen>
       <SectionHeader
@@ -25,6 +29,16 @@ export default function ProfileScreen() {
           <AppText style={styles.caption}>Curte ficcao cientifica, suspense e dramas intensos.</AppText>
         </View>
       </View>
+
+      <Pressable onPress={() => router.push('/streamings')} style={styles.streamingButton}>
+        <View style={styles.streamingButtonTextWrap}>
+          <AppText style={styles.streamingButtonTitle}>Meus streamings</AppText>
+          <AppText style={styles.streamingButtonCaption}>
+            Escolha os servicos que voce assina para personalizar as sugestoes.
+          </AppText>
+        </View>
+        <Ionicons name="chevron-forward" size={20} color={theme.colors.primarySoft} />
+      </Pressable>
 
       <View style={styles.statsRow}>
         <StatCard label="Assistidos" value={String(watched.length)} />
@@ -96,6 +110,31 @@ const styles = StyleSheet.create({
     color: theme.colors.textMuted,
     fontSize: theme.fonts.sm,
     lineHeight: 22,
+  },
+  streamingButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+    backgroundColor: '#1b1422',
+    borderRadius: theme.radius.xl,
+    borderWidth: 1,
+    borderColor: '#8A2BE255',
+    padding: theme.spacing.lg,
+  },
+  streamingButtonTextWrap: {
+    flex: 1,
+    gap: 4,
+  },
+  streamingButtonTitle: {
+    color: theme.colors.text,
+    fontSize: theme.fonts.md,
+    fontFamily: theme.fonts.family.bold,
+  },
+  streamingButtonCaption: {
+    color: theme.colors.textMuted,
+    fontSize: theme.fonts.sm,
+    lineHeight: 20,
   },
   statsRow: {
     flexDirection: 'row',

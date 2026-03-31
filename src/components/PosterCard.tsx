@@ -14,11 +14,12 @@ export function PosterCard({ item, compact = false }: { item: ContentItem; compa
   return (
     <Pressable
       onPress={() => router.push(`/content/${item.id}`)}
-      style={[styles.posterCard, compact && styles.posterCardCompact]}>
+      style={compact ? styles.posterCardCompact : styles.posterCard}>
+
       <View style={styles.posterMedia}>
         <Image
           source={{ uri: item.poster }}
-          style={[styles.posterImage, compact && styles.posterImageCompact]}
+          style={compact ? [styles.posterImage, styles.posterImageCompact] : styles.posterImage}
           contentFit="cover"
         />
       </View>
@@ -69,8 +70,13 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.border,
   },
   posterCardCompact: {
+    borderRadius: theme.radius.lg,
+    overflow: 'hidden',
+    backgroundColor: theme.colors.surface,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
     width: '100%',
-    minHeight: 220,
+    maxHeight: 200,
   },
   posterMedia: {
     backgroundColor: '#222',
@@ -80,7 +86,7 @@ const styles = StyleSheet.create({
     height: 170,
   },
   posterImageCompact: {
-    height: 118,
+    height: 60,
   },
   posterBody: {
     flex: 1,
@@ -122,6 +128,7 @@ const styles = StyleSheet.create({
   },
   posterMeta: {
     gap: 6,
+    
   },
   posterTitle: {
     color: '#fff',

@@ -33,6 +33,7 @@ export default function RootLayout() {
         }}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="content/[id]" />
+        <Stack.Screen name="streamings" />
       </Stack>
     </>
   );
