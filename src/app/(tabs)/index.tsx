@@ -25,10 +25,10 @@ export default function HomeScreen() {
       <HeroCard item={featured} />
 
       <View style={styles.section}>
-        <SectionHeader
-          title="Generos em destaque"
-          subtitle="Atalhos rapidos para explorar sem perder tempo."
-        />
+          <SectionHeader
+            title="Generos em destaque"
+            subtitle="Atalhos rapidos para explorar sem perder tempo."
+          />
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
           {['Suspense', 'Familia', 'Drama', 'Animacao', 'Acao', 'Ficcao Cientifica'].map((genre, index) => (
             <Chip key={genre} label={genre} active={index === 0} />
