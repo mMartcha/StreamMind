@@ -1,6 +1,6 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
-import { Chip, PosterCard, Screen, SectionHeader } from '@/src/components';
+import { AppText, Chip, PosterCard, Screen, SectionHeader } from '@/src/components';
 import { contentLibrary } from '@/src/data/content';
 import { theme } from '@/theme';
 
@@ -18,11 +18,11 @@ export default function ProfileScreen() {
 
       <View style={styles.hero}>
         <View style={styles.avatar}>
-          <Text style={styles.avatarText}>MM</Text>
+          <AppText style={styles.avatarText}>MM</AppText>
         </View>
         <View style={styles.heroText}>
-          <Text style={styles.name}>Marcello</Text>
-          <Text style={styles.caption}>Curte ficcao cientifica, suspense e dramas intensos.</Text>
+          <AppText style={styles.name}>Marcello</AppText>
+          <AppText style={styles.caption}>Curte ficcao cientifica, suspense e dramas intensos.</AppText>
         </View>
       </View>
 
@@ -33,7 +33,7 @@ export default function ProfileScreen() {
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.label}>Preferencias de genero</Text>
+        <AppText style={styles.label}>Preferencias de genero</AppText>
         <View style={styles.tagRow}>
           {['Ficcao Cientifica', 'Suspense', 'Drama', 'Familia'].map((genre) => (
             <Chip key={genre} label={genre} active />
@@ -42,7 +42,7 @@ export default function ProfileScreen() {
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.label}>Assistir depois</Text>
+        <AppText style={styles.label}>Assistir depois</AppText>
         <View style={styles.list}>
           {watchLater.map((item) => (
             <PosterCard key={item.id} item={item} compact />
@@ -56,8 +56,8 @@ export default function ProfileScreen() {
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
     <View style={styles.statCard}>
-      <Text style={styles.statValue}>{value}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
+      <AppText style={styles.statValue}>{value}</AppText>
+      <AppText style={styles.statLabel}>{label}</AppText>
     </View>
   );
 }
@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
   avatarText: {
     color: theme.colors.text,
     fontSize: theme.fonts.lg,
-    fontWeight: theme.fonts.bold,
+    fontFamily: theme.fonts.family.bold,
   },
   heroText: {
     flex: 1,
@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
   name: {
     color: theme.colors.text,
     fontSize: theme.fonts.lg,
-    fontWeight: theme.fonts.bold,
+    fontFamily: theme.fonts.family.bold,
   },
   caption: {
     color: theme.colors.textMuted,
@@ -113,12 +113,12 @@ const styles = StyleSheet.create({
   statValue: {
     color: theme.colors.primarySoft,
     fontSize: theme.fonts.xl,
-    fontWeight: theme.fonts.bold,
+    fontFamily: theme.fonts.family.bold,
   },
   statLabel: {
     color: theme.colors.textMuted,
     fontSize: theme.fonts.sm,
-    fontWeight: theme.fonts.medium,
+    fontFamily: theme.fonts.family.medium,
   },
   section: {
     gap: 12,
@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
   label: {
     color: theme.colors.text,
     fontSize: theme.fonts.md,
-    fontWeight: theme.fonts.semibold,
+    fontFamily: theme.fonts.family.semibold,
   },
   tagRow: {
     flexDirection: 'row',

@@ -1,7 +1,9 @@
-import { Text, Pressable, StyleSheet, View, Linking } from 'react-native';
+import { Pressable, StyleSheet, View, Linking } from 'react-native';
 
 import { platformMeta } from '@/src/data/content';
 import { theme } from '@/theme';
+
+import { AppText } from './AppText';
 
 export function PlatformBadge({ platform }: { platform: keyof typeof platformMeta }) {
   const meta = platformMeta[platform];
@@ -14,9 +16,9 @@ export function PlatformBadge({ platform }: { platform: keyof typeof platformMet
         { backgroundColor: `${meta.color}22`, borderColor: `${meta.color}55` },
       ]}>
       <View style={[styles.platformDot, { backgroundColor: meta.color }]}>
-        <Text style={styles.platformDotText}>{meta.short}</Text>
+        <AppText style={styles.platformDotText}>{meta.short}</AppText>
       </View>
-      <Text style={styles.platformText}>{platform}</Text>
+      <AppText style={styles.platformText}>{platform}</AppText>
     </Pressable>
   );
 }
@@ -41,11 +43,11 @@ const styles = StyleSheet.create({
   platformDotText: {
     color: '#fff',
     fontSize: 11,
-    fontWeight: theme.fonts.bold,
+    fontFamily: theme.fonts.family.bold,
   },
   platformText: {
     color: theme.colors.text,
     fontSize: theme.fonts.sm,
-    fontWeight: theme.fonts.semibold,
+    fontFamily: theme.fonts.family.semibold,
   },
 });

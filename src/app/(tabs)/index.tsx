@@ -1,6 +1,6 @@
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 
-import { Chip, HeroCard, HorizontalRail, Screen, SectionHeader } from '@/src/components';
+import { AppText, Chip, HeroCard, HorizontalRail, Screen, SectionHeader } from '@/src/components';
 import { contentLibrary } from '@/src/data/content';
 import { theme } from '@/theme';
 
@@ -12,8 +12,14 @@ export default function HomeScreen() {
   return (
     <Screen>
       <View style={styles.header}>
-        <Text style={styles.brand}>streamMind</Text>
-        <Text style={styles.subtitle}>Seu guia inteligente para descobrir o que assistir.</Text>
+        <AppText style={styles.brand}>
+            Stream
+          <AppText style={styles.innerBrand}>
+            Mind
+          </AppText>
+
+        </AppText>
+        <AppText style={styles.subtitle}>Seu guia inteligente para descobrir o que assistir.</AppText>
       </View>
 
       <HeroCard item={featured} />
@@ -56,12 +62,18 @@ const styles = StyleSheet.create({
   brand: {
     color: theme.colors.primary,
     fontSize: 34,
-    fontWeight: theme.fonts.bold,
+    // fontFamily: theme.fonts.family.bold,
+    alignSelf: 'center',
+  },
+  innerBrand: {
+    color: theme.colors.primary,
+    fontSize: 34,
+    fontFamily: theme.fonts.family.bold,
+    alignSelf: 'center',
   },
   subtitle: {
     color: theme.colors.textMuted,
-    fontSize: theme.fonts.md,
-    lineHeight: 24,
+    fontSize: theme.fonts.sm,
   },
   section: {
     gap: theme.spacing.md,

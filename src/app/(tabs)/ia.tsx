@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
-import { StyleSheet, Text, TextInput, View } from 'react-native';
+import { StyleSheet, TextInput, View } from 'react-native';
 
-import { PosterCard, Screen, SectionHeader } from '@/src/components';
+import { AppText, PosterCard, Screen, SectionHeader } from '@/src/components';
 import { aiConversation, contentLibrary } from '@/src/data/content';
 import { theme } from '@/theme';
 
@@ -31,7 +31,7 @@ export default function AIScreen() {
                 styles.bubble,
                 message.role === 'user' ? styles.userBubble : styles.assistantBubble,
               ]}>
-              <Text style={styles.bubbleText}>{message.text}</Text>
+              <AppText style={styles.bubbleText}>{message.text}</AppText>
             </View>
           </View>
         ))}
@@ -57,9 +57,9 @@ export default function AIScreen() {
         />
       </View>
 
-      <Text style={styles.footnote}>
+      <AppText style={styles.footnote}>
         O StreamMind recomenda e direciona voce para plataformas externas. O app nao reproduz conteudo.
-      </Text>
+      </AppText>
     </Screen>
   );
 }
@@ -127,6 +127,7 @@ const styles = StyleSheet.create({
     flex: 1,
     color: theme.colors.text,
     fontSize: theme.fonts.sm,
+    fontFamily: theme.fonts.family.regular,
   },
   footnote: {
     color: theme.colors.textSoft,

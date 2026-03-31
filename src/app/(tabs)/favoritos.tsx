@@ -1,6 +1,6 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
-import { PosterCard, Screen, SectionHeader } from '@/src/components';
+import { AppText, PosterCard, Screen, SectionHeader } from '@/src/components';
 import { contentLibrary } from '@/src/data/content';
 import { theme } from '@/theme';
 
@@ -15,10 +15,10 @@ export default function FavoritesScreen() {
       />
 
       <View style={styles.summaryCard}>
-        <Text style={styles.summaryTitle}>3 titulos salvos estao em servicos que voce assina</Text>
-        <Text style={styles.summaryText}>
+        <AppText style={styles.summaryTitle}>3 titulos salvos estao em servicos que voce assina</AppText>
+        <AppText style={styles.summaryText}>
           Prioridade hoje: continue de onde parou ou explore algo proximo do seu gosto.
-        </Text>
+        </AppText>
       </View>
 
       <View style={styles.list}>
@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
   summaryTitle: {
     color: theme.colors.text,
     fontSize: theme.fonts.md,
-    fontWeight: theme.fonts.bold,
+    fontFamily: theme.fonts.family.bold,
   },
   summaryText: {
     color: theme.colors.textMuted,

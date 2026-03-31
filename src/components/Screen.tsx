@@ -30,7 +30,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: theme.spacing.lg,
-    paddingTop: theme.spacing.xxl,
+    paddingTop: theme.spacing.top,
     paddingBottom: theme.spacing.xxl,
     gap: theme.spacing.lg,
   },

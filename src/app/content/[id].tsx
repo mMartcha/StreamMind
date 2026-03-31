@@ -1,9 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
-import { HorizontalRail, SectionHeader, StreamingRow } from '@/src/components';
+import { AppText, HorizontalRail, SectionHeader, StreamingRow } from '@/src/components';
 import { contentLibrary } from '@/src/data/content';
 import { theme } from '@/theme';
 
@@ -28,29 +28,29 @@ export default function ContentDetailsScreen() {
             <Ionicons name="arrow-back" size={18} color={theme.colors.text} />
           </Pressable>
           <View style={styles.posterContent}>
-            <Text style={styles.title}>{item.title}</Text>
-            <Text style={styles.meta}>
-              {item.type} â€¢ {item.year} â€¢ {item.duration}
-            </Text>
-            <Text style={styles.genres}>{item.genre.join('  â€¢  ')}</Text>
+            <AppText style={styles.title}>{item.title}</AppText>
+            <AppText style={styles.meta}>
+              {item.type} • {item.year} • {item.duration}
+            </AppText>
+            <AppText style={styles.genres}>{item.genre.join('  •  ')}</AppText>
           </View>
         </View>
 
         <View style={styles.panel}>
           <View style={styles.scoreRow}>
             <View style={styles.scoreCard}>
-              <Text style={styles.scoreLabel}>IMDb</Text>
-              <Text style={styles.scoreValue}>{item.imdb}</Text>
+              <AppText style={styles.scoreLabel}>IMDb</AppText>
+              <AppText style={styles.scoreValue}>{item.imdb}</AppText>
             </View>
             <View style={styles.scoreCard}>
-              <Text style={styles.scoreLabel}>Status</Text>
-              <Text style={styles.scoreValueMuted}>Disponivel</Text>
+              <AppText style={styles.scoreLabel}>Status</AppText>
+              <AppText style={styles.scoreValueMuted}>Disponivel</AppText>
             </View>
           </View>
 
           <View style={styles.block}>
             <SectionHeader title="Curadoria IA" subtitle="Resumo pensado para ajudar na decisao, nao para reproduzir o conteudo." />
-            <Text style={styles.paragraph}>{item.aiSynopsis}</Text>
+            <AppText style={styles.paragraph}>{item.aiSynopsis}</AppText>
           </View>
 
           <View style={styles.block}>
@@ -63,7 +63,7 @@ export default function ContentDetailsScreen() {
             <View style={styles.castRow}>
               {item.cast.map((person) => (
                 <View key={person} style={styles.castChip}>
-                  <Text style={styles.castText}>{person}</Text>
+                  <AppText style={styles.castText}>{person}</AppText>
                 </View>
               ))}
             </View>
@@ -118,12 +118,12 @@ const styles = StyleSheet.create({
   title: {
     color: '#fff',
     fontSize: 30,
-    fontWeight: theme.fonts.bold,
+    fontFamily: theme.fonts.family.bold,
   },
   meta: {
     color: '#ece4f9',
     fontSize: theme.fonts.md,
-    fontWeight: theme.fonts.medium,
+    fontFamily: theme.fonts.family.medium,
   },
   genres: {
     color: theme.colors.textMuted,
@@ -158,12 +158,12 @@ const styles = StyleSheet.create({
   scoreValue: {
     color: theme.colors.imdb,
     fontSize: theme.fonts.lg,
-    fontWeight: theme.fonts.bold,
+    fontFamily: theme.fonts.family.bold,
   },
   scoreValueMuted: {
     color: theme.colors.success,
     fontSize: theme.fonts.lg,
-    fontWeight: theme.fonts.bold,
+    fontFamily: theme.fonts.family.bold,
   },
   block: {
     gap: 12,
@@ -189,6 +189,6 @@ const styles = StyleSheet.create({
   castText: {
     color: theme.colors.text,
     fontSize: theme.fonts.sm,
-    fontWeight: theme.fonts.medium,
+    fontFamily: theme.fonts.family.medium,
   },
 });

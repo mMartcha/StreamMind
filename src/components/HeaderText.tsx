@@ -1,10 +1,9 @@
 import { theme } from "@/theme";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 export default function HeaderText() {
     return (
         <View style={styles.header}>
-            <Text style={styles.brand}>streamMind</Text>
         </View>
     )
 }

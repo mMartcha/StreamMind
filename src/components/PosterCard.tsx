@@ -1,10 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ContentItem, platformMeta } from '@/src/data/content';
 import { theme } from '@/theme';
+
+import { AppText } from './AppText';
 
 export function PosterCard({ item, compact = false }: { item: ContentItem; compact?: boolean }) {
   const router = useRouter();
@@ -25,20 +27,20 @@ export function PosterCard({ item, compact = false }: { item: ContentItem; compa
         <View style={styles.posterTopRow}>
           <View style={styles.imdbPill}>
             <Ionicons name="star" size={12} color="#111" />
-            <Text style={styles.imdbText}>{item.imdb}</Text>
+            <AppText style={styles.imdbText}>{item.imdb}</AppText>
           </View>
           <View style={styles.typePill}>
-            <Text style={styles.typePillText}>{item.type}</Text>
+            <AppText style={styles.typePillText}>{item.type}</AppText>
           </View>
         </View>
 
         <View style={styles.posterMeta}>
-          <Text numberOfLines={1} style={styles.posterTitle}>
+          <AppText numberOfLines={1} style={styles.posterTitle}>
             {item.title}
-          </Text>
-          <Text style={styles.posterSubtitle}>
+          </AppText>
+          <AppText style={styles.posterSubtitle}>
             {item.year} • {item.genre[0]}
-          </Text>
+          </AppText>
           <View style={styles.platformTinyRow}>
             {item.availableOn.slice(0, 3).map((platform) => (
               <View
@@ -103,7 +105,7 @@ const styles = StyleSheet.create({
   imdbText: {
     color: '#111',
     fontSize: theme.fonts.xsm,
-    fontWeight: theme.fonts.bold,
+    fontFamily: theme.fonts.family.bold,
   },
   typePill: {
     backgroundColor: theme.colors.surfaceGlass,
@@ -116,7 +118,7 @@ const styles = StyleSheet.create({
   typePillText: {
     color: theme.colors.text,
     fontSize: theme.fonts.xsm,
-    fontWeight: theme.fonts.semibold,
+    fontFamily: theme.fonts.family.semibold,
   },
   posterMeta: {
     gap: 6,
@@ -124,7 +126,7 @@ const styles = StyleSheet.create({
   posterTitle: {
     color: '#fff',
     fontSize: theme.fonts.md,
-    fontWeight: theme.fonts.bold,
+    fontFamily: theme.fonts.family.bold,
   },
   posterSubtitle: {
     color: '#dfd7ea',

@@ -1,10 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
-import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
-import { Chip, PosterCard, Screen, SectionHeader } from '@/src/components';
+import { AppText, Chip, PosterCard, Screen, SectionHeader } from '@/src/components';
 import { contentLibrary, genres } from '@/src/data/content';
 import { theme } from '@/theme';
-import React from 'react';
 
 export default function SearchScreen() {
   return (
@@ -24,7 +23,7 @@ export default function SearchScreen() {
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.label}>Generos populares</Text>
+        <AppText style={styles.label}>Generos populares</AppText>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
           {genres.map((genre, index) => (
             <Chip key={genre} label={genre} active={index === 1} />
@@ -59,6 +58,7 @@ const styles = StyleSheet.create({
     flex: 1,
     color: theme.colors.text,
     fontSize: theme.fonts.md,
+    fontFamily: theme.fonts.family.regular,
   },
   section: {
     gap: 10,
@@ -66,7 +66,7 @@ const styles = StyleSheet.create({
   label: {
     color: theme.colors.text,
     fontSize: theme.fonts.md,
-    fontWeight: theme.fonts.semibold,
+    fontFamily: theme.fonts.family.semibold,
   },
   chips: {
     gap: 10,

@@ -1,11 +1,12 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
+import { AppText } from './AppText';
 import { theme } from '@/theme';
 
 export function Chip({ label, active = false }: { label: string; active?: boolean }) {
   return (
     <View style={[styles.chip, active && styles.chipActive]}>
-      <Text style={[styles.chipText, active && styles.chipTextActive]}>{label}</Text>
+      <AppText style={[styles.chipText, active && styles.chipTextActive]}>{label}</AppText>
     </View>
   );
 }
@@ -26,7 +27,7 @@ const styles = StyleSheet.create({
   chipText: {
     color: theme.colors.textMuted,
     fontSize: theme.fonts.sm,
-    fontWeight: theme.fonts.medium,
+    fontFamily: theme.fonts.family.medium,
   },
   chipTextActive: {
     color: theme.colors.primarySoft,
