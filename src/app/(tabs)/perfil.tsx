@@ -153,11 +153,14 @@ const styles = StyleSheet.create({
     color: theme.colors.primarySoft,
     fontSize: theme.fonts.xl,
     fontFamily: theme.fonts.family.bold,
+    textAlign:'center'
   },
   statLabel: {
     color: theme.colors.textMuted,
     fontSize: theme.fonts.sm,
     fontFamily: theme.fonts.family.medium,
+    textAlign:'center'
+    
   },
   section: {
     gap: 12,

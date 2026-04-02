@@ -1,4 +1,3 @@
-import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
@@ -6,6 +5,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { ContentItem, platformMeta } from '@/src/data/content';
 import { theme } from '@/theme';
 
+import { Ionicons } from '@expo/vector-icons';
 import { AppText } from './AppText';
 
 export function PosterCard({ item, compact = false }: { item: ContentItem; compact?: boolean }) {
@@ -23,38 +23,120 @@ export function PosterCard({ item, compact = false }: { item: ContentItem; compa
           contentFit="cover"
         />
       </View>
+      {!compact ? (
 
-      <View style={styles.posterBody}>
-        <View style={styles.posterTopRow}>
-          <View style={styles.imdbPill}>
-            <Ionicons name="star" size={12} color="#111" />
-            <AppText style={styles.imdbText}>{item.imdb}</AppText>
+        <View style={styles.posterBodyCompact}>
+          <View style={styles.posterTopRowCompact}>
+            <View style={styles.imdbPill}>
+              <Ionicons name="star" size={12} color="#111" />
+              <AppText style={styles.imdbText}>{item.imdb}</AppText>
+            </View>
+            <View style={styles.typePill}>
+              <AppText style={styles.typePillText}>{item.type}</AppText>
+            </View>
           </View>
-          <View style={styles.typePill}>
-            <AppText style={styles.typePillText}>{item.type}</AppText>
+
+          <View style={styles.posterMeta}>
+
+            <AppText numberOfLines={1} style={styles.posterTitle}>
+              {item.title}
+            </AppText>
+
+            <View style={styles.posterMetaLower}>
+              <AppText style={styles.posterSubtitle}>
+                {item.year} • {item.genre[0]}
+              </AppText>
+              {
+                compact &&
+                <>
+                  <AppText style={styles.posterSubtitle}>•</AppText>
+                  <View style={styles.platformTinyRow}>
+                    {item.availableOn.slice(0, 3).map((platform) => (
+                      <View
+                        key={platform}
+                        style={[
+                          styles.platformTiny,
+                          { backgroundColor: platformMeta[platform].color },
+                        ]}
+                      />
+                    ))}
+                  </View>
+                </>
+              }
+            </View>
+            {
+              !compact &&
+              <View style={styles.platformTinyRow}>
+                {item.availableOn.slice(0, 3).map((platform) => (
+                  <View
+                    key={platform}
+                    style={[
+                      styles.platformTiny,
+                      { backgroundColor: platformMeta[platform].color },
+                    ]}
+                  />
+                ))}
+              </View>
+            }
           </View>
         </View>
+      ) : (
+        <View style={styles.posterBody}>
 
-        <View style={styles.posterMeta}>
-          <AppText numberOfLines={1} style={styles.posterTitle}>
-            {item.title}
-          </AppText>
-          <AppText style={styles.posterSubtitle}>
-            {item.year} • {item.genre[0]}
-          </AppText>
-          <View style={styles.platformTinyRow}>
-            {item.availableOn.slice(0, 3).map((platform) => (
-              <View
-                key={platform}
-                style={[
-                  styles.platformTiny,
-                  { backgroundColor: platformMeta[platform].color },
-                ]}
-              />
-            ))}
+          <View style={styles.posterMeta}>
+
+            <AppText numberOfLines={1} style={styles.posterTitle}>
+              {item.title}
+            </AppText>
+
+            <View style={styles.posterMetaLower}>
+              <AppText style={styles.posterSubtitle}>
+                {item.year} • {item.genre[0]}
+              </AppText>
+              {
+                compact &&
+                <>
+                  <AppText style={styles.posterSubtitle}>•</AppText>
+                  <View style={styles.platformTinyRow}>
+                    {item.availableOn.slice(0, 3).map((platform) => (
+                      <View
+                        key={platform}
+                        style={[
+                          styles.platformTiny,
+                          { backgroundColor: platformMeta[platform].color },
+                        ]}
+                      />
+                    ))}
+                  </View>
+                </>
+              }
+            </View>
+            {
+              !compact &&
+              <View style={styles.platformTinyRow}>
+                {item.availableOn.slice(0, 3).map((platform) => (
+                  <View
+                    key={platform}
+                    style={[
+                      styles.platformTiny,
+                      { backgroundColor: platformMeta[platform].color },
+                    ]}
+                  />
+                ))}
+              </View>
+            }
+          </View>
+          <View style={styles.posterTopRow}>
+            <View style={styles.imdbPill}>
+              <Ionicons name="star" size={12} color="#111" />
+              <AppText style={styles.imdbText}>{item.imdb}</AppText>
+            </View>
+            <View style={styles.typePill}>
+              <AppText style={styles.typePillText}>{item.type}</AppText>
+            </View>
           </View>
         </View>
-      </View>
+      )}
     </Pressable>
   );
 }
@@ -76,7 +158,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: theme.colors.border,
     width: '100%',
-    maxHeight: 200,
+
   },
   posterMedia: {
     backgroundColor: '#222',
@@ -88,16 +170,30 @@ const styles = StyleSheet.create({
   posterImageCompact: {
     height: 60,
   },
-  posterBody: {
+  posterBodyCompact: {
     flex: 1,
     gap: 12,
     padding: theme.spacing.md,
     backgroundColor: theme.colors.surfaceGlass,
   },
-  posterTopRow: {
+  posterBody: {
+    flex: 1,
+    gap: 12,
+    padding: theme.spacing.md,
+    backgroundColor: theme.colors.surfaceGlass,
+    justifyContent: 'space-between',
+    flexDirection: 'row'
+
+  },
+  posterTopRowCompact: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+  },
+  posterTopRow: {
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap:6
   },
   imdbPill: {
     flexDirection: 'row',
@@ -128,7 +224,12 @@ const styles = StyleSheet.create({
   },
   posterMeta: {
     gap: 6,
-    
+
+  },
+  posterMetaLower: {
+    gap: 6,
+    flexDirection: 'row'
+
   },
   posterTitle: {
     color: '#fff',
