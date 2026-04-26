@@ -1,14 +1,49 @@
+import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
 import { AppText, Chip, HeroCard, HorizontalRail, Screen, SectionHeader } from '@/src/components';
-import { contentLibrary } from '@/src/data/content';
+import { CatalogContentItem, getTrending, toContentItem } from '@/src/services/api';
 import { theme } from '@/theme';
 
-const featured = contentLibrary[0];
-const recommended = contentLibrary.filter((item) => item.recommended);
-const trending = contentLibrary.filter((item) => item.trending);
-
 export default function HomeScreen() {
+  const [items, setItems] = useState<CatalogContentItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadTrending() {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const data = await getTrending();
+
+        if (isMounted) {
+          setItems(data.map(toContentItem));
+        }
+      } catch {
+        if (isMounted) {
+          setError('Nao foi possivel carregar o catalogo agora.');
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    loadTrending();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const featured = items[0];
+  const recommended = items.slice(0, 6);
+  const trending = items;
+
   return (
     <Screen>
       <View style={styles.header}>
@@ -22,7 +57,9 @@ export default function HomeScreen() {
         <AppText style={styles.subtitle}>Seu guia inteligente para descobrir o que assistir.</AppText>
       </View>
 
-      <HeroCard item={featured} />
+      {isLoading && <AppText style={styles.feedback}>Carregando catalogo...</AppText>}
+      {error && <AppText style={styles.feedback}>{error}</AppText>}
+      {featured && <HeroCard item={featured} />}
 
       <View style={styles.section}>
           <SectionHeader
@@ -81,5 +118,9 @@ const styles = StyleSheet.create({
   chips: {
     gap: 10,
     paddingRight: theme.spacing.lg,
+  },
+  feedback: {
+    color: theme.colors.textMuted,
+    fontSize: theme.fonts.md,
   },
 });

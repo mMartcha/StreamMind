@@ -1,18 +1,242 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
-import { AppText, HorizontalRail, SectionHeader, StreamingRow } from '@/src/components';
-import { contentLibrary } from '@/src/data/content';
+import { AppText, HorizontalRail, SectionHeader } from '@/src/components';
+import {
+  CatalogContentItem,
+  UserTitleItem,
+  UserTitleStatus,
+  ProvidersResponse,
+  StreamingProvider,
+  addUserListItem,
+  getMovieDetails,
+  getMovieProviders,
+  getTrending,
+  getTvDetails,
+  getTvProviders,
+  getUserLists,
+  parseContentRouteId,
+  removeUserListItemById,
+  removeUserListItemByTitle,
+  toContentItem,
+  toUserTitleMediaType,
+} from '@/src/services/api';
 import { theme } from '@/theme';
+
+const userListActions: {
+  status: UserTitleStatus;
+  label: string;
+  activeLabel: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  inactiveIcon: keyof typeof Ionicons.glyphMap;
+}[] = [
+  {
+    status: 'FAVORITE',
+    label: 'Favoritar',
+    activeLabel: 'Favorito',
+    icon: 'heart',
+    inactiveIcon: 'heart-outline',
+  },
+  {
+    status: 'WATCHLIST',
+    label: 'Quero assistir',
+    activeLabel: 'Na lista',
+    icon: 'bookmark',
+    inactiveIcon: 'bookmark-outline',
+  },
+  {
+    status: 'WATCHED',
+    label: 'Assistido',
+    activeLabel: 'Assistido',
+    icon: 'checkmark-circle',
+    inactiveIcon: 'checkmark-circle-outline',
+  },
+];
+
+type UserListState = Record<UserTitleStatus, UserTitleItem | null>;
+
+const emptyUserListState: UserListState = {
+  FAVORITE: null,
+  WATCHLIST: null,
+  WATCHED: null,
+};
 
 export default function ContentDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
 
-  const item = contentLibrary.find((entry) => entry.id === id) ?? contentLibrary[0];
-  const related = contentLibrary.filter((entry) => entry.id !== item.id).slice(0, 4);
+  const [item, setItem] = useState<CatalogContentItem | null>(null);
+  const [providers, setProviders] = useState<ProvidersResponse | null>(null);
+  const [related, setRelated] = useState<CatalogContentItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [userListState, setUserListState] = useState<UserListState>(emptyUserListState);
+  const [pendingStatus, setPendingStatus] = useState<UserTitleStatus | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const routeInfo = useMemo(() => parseContentRouteId(id), [id]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadDetails() {
+      if (!routeInfo) {
+        setError('Conteudo nao encontrado.');
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        const details =
+          routeInfo.mediaType === 'movie'
+            ? await getMovieDetails(routeInfo.tmdbId)
+            : await getTvDetails(routeInfo.tmdbId);
+
+        if (isMounted) {
+          setItem(toContentItem(details));
+        }
+
+        const [providersResult, trendingResult] = await Promise.allSettled([
+          routeInfo.mediaType === 'movie'
+            ? getMovieProviders(routeInfo.tmdbId)
+            : getTvProviders(routeInfo.tmdbId),
+          getTrending(),
+        ]);
+
+        if (!isMounted) {
+          return;
+        }
+
+        setProviders(providersResult.status === 'fulfilled' ? providersResult.value : null);
+        setRelated(
+          trendingResult.status === 'fulfilled'
+            ? trendingResult.value
+                .filter((entry) => entry.tmdbId !== routeInfo.tmdbId)
+                .slice(0, 4)
+                .map(toContentItem)
+            : [],
+        );
+      } catch {
+        if (isMounted) {
+          setError('Nao foi possivel carregar os detalhes agora.');
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    loadDetails();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [routeInfo]);
+
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+
+      async function loadUserLists() {
+        if (!routeInfo) {
+          return;
+        }
+
+        try {
+          const mediaType = toUserTitleMediaType(routeInfo.mediaType);
+          const lists = await getUserLists();
+
+          if (!isActive) {
+            return;
+          }
+
+          setUserListState({
+            FAVORITE:
+              lists.find(
+                (entry) =>
+                  entry.tmdbId === routeInfo.tmdbId &&
+                  entry.mediaType === mediaType &&
+                  entry.status === 'FAVORITE',
+              ) ?? null,
+            WATCHLIST:
+              lists.find(
+                (entry) =>
+                  entry.tmdbId === routeInfo.tmdbId &&
+                  entry.mediaType === mediaType &&
+                  entry.status === 'WATCHLIST',
+              ) ?? null,
+            WATCHED:
+              lists.find(
+                (entry) =>
+                  entry.tmdbId === routeInfo.tmdbId &&
+                  entry.mediaType === mediaType &&
+                  entry.status === 'WATCHED',
+              ) ?? null,
+          });
+        } catch {
+          if (isActive) {
+            setUserListState(emptyUserListState);
+          }
+        }
+      }
+
+      loadUserLists();
+
+      return () => {
+        isActive = false;
+      };
+    }, [routeInfo]),
+  );
+
+  async function toggleUserListStatus(status: UserTitleStatus) {
+    if (!item) {
+      return;
+    }
+
+    const mediaType = toUserTitleMediaType(item.mediaType);
+    const currentItem = userListState[status];
+
+    try {
+      setPendingStatus(status);
+
+      if (currentItem) {
+        if (currentItem.id) {
+          await removeUserListItemById(currentItem.id);
+        } else {
+          await removeUserListItemByTitle({ tmdbId: item.tmdbId, mediaType, status });
+        }
+
+        setUserListState((current) => ({ ...current, [status]: null }));
+        return;
+      }
+
+      const createdItem = await addUserListItem({
+        tmdbId: item.tmdbId,
+        mediaType,
+        status,
+        title: item.title,
+        overview: item.shortSynopsis,
+        posterUrl: item.poster,
+        backdropUrl: item.backdrop,
+        releaseDate: item.releaseDate,
+        voteAverage: item.voteAverage,
+      });
+
+      setUserListState((current) => ({ ...current, [status]: createdItem }));
+    } catch {
+      setError('Nao foi possivel atualizar sua lista agora.');
+    } finally {
+      setPendingStatus(null);
+    }
+  }
+
+  const flatrateProviders = providers?.flatrate ?? [];
 
   return (
     <>
@@ -22,60 +246,107 @@ export default function ContentDetailsScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}>
         <View style={styles.posterWrap}>
-          <Image source={{ uri: item.backdrop }} style={styles.backdrop} contentFit="cover" />
+          {item && <Image source={{ uri: item.backdrop }} style={styles.backdrop} contentFit="cover" />}
           <View style={styles.posterShade} />
           <Pressable onPress={() => router.back()} style={styles.backButton}>
             <Ionicons name="arrow-back" size={18} color={theme.colors.text} />
           </Pressable>
-          <View style={styles.posterContent}>
-            <AppText style={styles.title}>{item.title}</AppText>
-            <AppText style={styles.meta}>
-              {item.type} • {item.year} • {item.duration}
-            </AppText>
-            <AppText style={styles.genres}>{item.genre.join('  •  ')}</AppText>
-          </View>
+          {item && (
+            <View style={styles.posterContent}>
+              <AppText style={styles.title}>{item.title}</AppText>
+              <AppText style={styles.meta}>
+                {item.type} - {item.year} - {item.duration}
+              </AppText>
+              <AppText style={styles.genres}>{item.genre.join('  -  ')}</AppText>
+            </View>
+          )}
         </View>
 
         <View style={styles.panel}>
-          <View style={styles.scoreRow}>
-            <View style={styles.scoreCard}>
-              <AppText style={styles.scoreLabel}>IMDb</AppText>
-              <AppText style={styles.scoreValue}>{item.imdb}</AppText>
-            </View>
-            <View style={styles.scoreCard}>
-              <AppText style={styles.scoreLabel}>Status</AppText>
-              <AppText style={styles.scoreValueMuted}>Disponivel</AppText>
-            </View>
-          </View>
+          {isLoading && <AppText style={styles.feedback}>Carregando detalhes...</AppText>}
+          {error && <AppText style={styles.feedback}>{error}</AppText>}
 
-          <View style={styles.block}>
-            <SectionHeader title="Curadoria IA" subtitle="Resumo pensado para ajudar na decisao, nao para reproduzir o conteudo." />
-            <AppText style={styles.paragraph}>{item.aiSynopsis}</AppText>
-          </View>
-
-          <View style={styles.block}>
-            <SectionHeader title="Disponivel em" subtitle="A tela de detalhes funciona como ponte para os servicos externos." />
-            <StreamingRow platforms={item.availableOn} />
-          </View>
-
-          <View style={styles.block}>
-            <SectionHeader title="Elenco" />
-            <View style={styles.castRow}>
-              {item.cast.map((person) => (
-                <View key={person} style={styles.castChip}>
-                  <AppText style={styles.castText}>{person}</AppText>
+          {item && (
+            <>
+              <View style={styles.scoreRow}>
+                <View style={styles.scoreCard}>
+                  <AppText style={styles.scoreLabel}>TMDB</AppText>
+                  <AppText style={styles.scoreValue}>{item.imdb}</AppText>
                 </View>
-              ))}
-            </View>
-          </View>
+                <View style={styles.scoreCard}>
+                  <AppText style={styles.scoreLabel}>Status</AppText>
+                  <AppText style={styles.scoreValueMuted}>{item.status ?? item.duration}</AppText>
+                </View>
+              </View>
 
-          <View style={styles.block}>
-            <SectionHeader title="Relacionados" subtitle="Continuando sua descoberta dentro do StreamMind." />
-            <HorizontalRail items={related} />
-          </View>
+              <View style={styles.actionRow}>
+                {userListActions.map((action) => {
+                  const isActive = Boolean(userListState[action.status]);
+                  const isPending = pendingStatus === action.status;
+
+                  return (
+                    <Pressable
+                      key={action.status}
+                      disabled={Boolean(pendingStatus)}
+                      onPress={() => toggleUserListStatus(action.status)}
+                      style={[
+                        styles.actionButton,
+                        isActive && styles.actionButtonActive,
+                        isPending && styles.actionButtonPending,
+                      ]}>
+                      <Ionicons
+                        name={isActive ? action.icon : action.inactiveIcon}
+                        size={18}
+                        color={isActive ? '#111' : theme.colors.text}
+                      />
+                      <AppText style={[styles.actionText, isActive && styles.actionTextActive]}>
+                        {isPending ? '...' : isActive ? action.activeLabel : action.label}
+                      </AppText>
+                    </Pressable>
+                  );
+                })}
+              </View>
+
+              <View style={styles.block}>
+                <SectionHeader title="Sinopse" subtitle="Resumo oficial carregado pelo catalogo." />
+                <AppText style={styles.paragraph}>{item.aiSynopsis}</AppText>
+              </View>
+
+              <View style={styles.block}>
+                <SectionHeader title="Disponivel em" subtitle="A tela de detalhes funciona como ponte para os servicos externos." />
+                {flatrateProviders.length > 0 ? (
+                  <ProviderRow providers={flatrateProviders} />
+                ) : (
+                  <AppText style={styles.paragraph}>Nao disponivel por assinatura no Brasil.</AppText>
+                )}
+              </View>
+
+              {related.length > 0 && (
+                <View style={styles.block}>
+                  <SectionHeader title="Relacionados" subtitle="Continuando sua descoberta dentro do StreamMind." />
+                  <HorizontalRail items={related} />
+                </View>
+              )}
+            </>
+          )}
         </View>
       </ScrollView>
     </>
+  );
+}
+
+function ProviderRow({ providers }: { providers: StreamingProvider[] }) {
+  return (
+    <View style={styles.castRow}>
+      {providers.map((provider) => (
+        <View key={provider.id} style={styles.castChip}>
+          {provider.logoUrl ? (
+            <Image source={{ uri: provider.logoUrl }} style={styles.providerLogo} contentFit="contain" />
+          ) : null}
+          <AppText style={styles.castText}>{provider.name}</AppText>
+        </View>
+      ))}
+    </View>
   );
 }
 
@@ -165,6 +436,37 @@ const styles = StyleSheet.create({
     fontSize: theme.fonts.lg,
     fontFamily: theme.fonts.family.bold,
   },
+  actionRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    borderRadius: theme.radius.pill,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    backgroundColor: theme.colors.surface,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  actionButtonActive: {
+    backgroundColor: theme.colors.primarySoft,
+    borderColor: theme.colors.primarySoft,
+  },
+  actionButtonPending: {
+    opacity: 0.72,
+  },
+  actionText: {
+    color: theme.colors.text,
+    fontSize: theme.fonts.sm,
+    fontFamily: theme.fonts.family.semibold,
+  },
+  actionTextActive: {
+    color: '#111',
+  },
   block: {
     gap: 12,
   },
@@ -179,6 +481,9 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   castChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
     paddingHorizontal: 14,
     paddingVertical: 10,
     borderRadius: theme.radius.pill,
@@ -190,5 +495,14 @@ const styles = StyleSheet.create({
     color: theme.colors.text,
     fontSize: theme.fonts.sm,
     fontFamily: theme.fonts.family.medium,
+  },
+  providerLogo: {
+    width: 24,
+    height: 24,
+    borderRadius: 5,
+  },
+  feedback: {
+    color: theme.colors.textMuted,
+    fontSize: theme.fonts.md,
   },
 });

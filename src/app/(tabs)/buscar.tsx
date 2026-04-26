@@ -1,11 +1,56 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
 import { AppText, Chip, PosterCard, Screen, SectionHeader } from '@/src/components';
-import { contentLibrary, genres } from '@/src/data/content';
+import { genres } from '@/src/data/content';
+import { CatalogContentItem, searchCatalog, toContentItem } from '@/src/services/api';
 import { theme } from '@/theme';
 
 export default function SearchScreen() {
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState<CatalogContentItem[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const trimmedQuery = query.trim();
+
+  useEffect(() => {
+    let isMounted = true;
+
+    if (!trimmedQuery) {
+      setResults([]);
+      setIsLoading(false);
+      setError(null);
+      return;
+    }
+
+    const timeoutId = setTimeout(async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const data = await searchCatalog(trimmedQuery);
+
+        if (isMounted) {
+          setResults(data.map(toContentItem));
+        }
+      } catch {
+        if (isMounted) {
+          setError('Nao foi possivel buscar no catalogo agora.');
+          setResults([]);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    }, 350);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timeoutId);
+    };
+  }, [trimmedQuery]);
+
   return (
     <Screen>
       <SectionHeader
@@ -19,6 +64,8 @@ export default function SearchScreen() {
           placeholder="Busque por titulo, genero ou clima"
           placeholderTextColor={theme.colors.textSoft}
           style={styles.searchInput}
+          value={query}
+          onChangeText={setQuery}
         />
       </View>
 
@@ -31,8 +78,17 @@ export default function SearchScreen() {
         </ScrollView>
       </View>
 
+      {!trimmedQuery && (
+        <AppText style={styles.feedback}>Digite um titulo para buscar no catalogo.</AppText>
+      )}
+      {isLoading && <AppText style={styles.feedback}>Buscando...</AppText>}
+      {error && <AppText style={styles.feedback}>{error}</AppText>}
+      {trimmedQuery && !isLoading && !error && results.length === 0 && (
+        <AppText style={styles.feedback}>Nenhum resultado encontrado.</AppText>
+      )}
+
       <View style={styles.grid}>
-        {contentLibrary.map((item) => (
+        {results.map((item) => (
           <View key={item.id} style={styles.gridItem}>
             <PosterCard item={item} compact />
           </View>
@@ -77,5 +133,9 @@ const styles = StyleSheet.create({
   },
   gridItem: {
     width: '100%',
+  },
+  feedback: {
+    color: theme.colors.textMuted,
+    fontSize: theme.fonts.md,
   },
 });

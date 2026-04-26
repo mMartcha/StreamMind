@@ -1,17 +1,70 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
+import { useCallback, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText, Chip, PosterCard, Screen, SectionHeader } from '@/src/components';
-import { contentLibrary } from '@/src/data/content';
+import {
+  CatalogContentItem,
+  UserListStats,
+  getUserListStats,
+  getUserLists,
+  toContentItemFromUserList,
+} from '@/src/services/api';
 import { theme } from '@/theme';
 
-const watched = contentLibrary.filter((item) => item.watched);
-const favorites = contentLibrary.filter((item) => item.favorite);
-const watchLater = contentLibrary.filter((item) => item.watchLater);
+const emptyStats: UserListStats = {
+  favorites: 0,
+  watchlist: 0,
+  watched: 0,
+};
 
 export default function ProfileScreen() {
   const router = useRouter();
+  const [stats, setStats] = useState<UserListStats>(emptyStats);
+  const [watchLater, setWatchLater] = useState<CatalogContentItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+
+      async function loadProfileLists() {
+        try {
+          setIsLoading(true);
+          setError(null);
+
+          const [statsResult, watchlistResult] = await Promise.all([
+            getUserListStats(),
+            getUserLists('WATCHLIST'),
+          ]);
+
+          if (isActive) {
+            setStats(statsResult);
+            setWatchLater(watchlistResult.map(toContentItemFromUserList));
+          }
+        } catch {
+          if (isActive) {
+            setStats(emptyStats);
+            setWatchLater([]);
+            setError('Nao foi possivel carregar os dados do perfil agora.');
+          }
+        } finally {
+          if (isActive) {
+            setIsLoading(false);
+          }
+        }
+      }
+
+      loadProfileLists();
+
+      return () => {
+        isActive = false;
+      };
+    }, []),
+  );
 
   return (
     <Screen>
@@ -41,10 +94,13 @@ export default function ProfileScreen() {
       </Pressable>
 
       <View style={styles.statsRow}>
-        <StatCard label="Assistidos" value={String(watched.length)} />
-        <StatCard label="Favoritos" value={String(favorites.length)} />
-        <StatCard label="Depois" value={String(watchLater.length)} />
+        <StatCard label="Assistidos" value={String(stats.watched)} />
+        <StatCard label="Favoritos" value={String(stats.favorites)} />
+        <StatCard label="Depois" value={String(stats.watchlist)} />
       </View>
+
+      {isLoading && <AppText style={styles.feedback}>Carregando perfil...</AppText>}
+      {error && <AppText style={styles.feedback}>{error}</AppText>}
 
       <View style={styles.section}>
         <AppText style={styles.label}>Preferencias de genero</AppText>
@@ -57,6 +113,9 @@ export default function ProfileScreen() {
 
       <View style={styles.section}>
         <AppText style={styles.label}>Assistir depois</AppText>
+        {!isLoading && !error && watchLater.length === 0 && (
+          <AppText style={styles.feedback}>Nenhum titulo salvo para depois.</AppText>
+        )}
         <View style={styles.list}>
           {watchLater.map((item) => (
             <PosterCard key={item.id} item={item} compact />
@@ -177,5 +236,9 @@ const styles = StyleSheet.create({
   },
   list: {
     gap: theme.spacing.md,
+  },
+  feedback: {
+    color: theme.colors.textMuted,
+    fontSize: theme.fonts.md,
   },
 });
