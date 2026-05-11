@@ -1,9 +1,14 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
 
 import { ContentItem } from '@/src/data/content';
 
+export const AUTH_TOKEN_STORAGE_KEY = '@streammind:auth_token';
+export const AUTH_USER_STORAGE_KEY = '@streammind:auth_user';
+
 export const API_BASE_URL =
-  Platform.OS === 'android' ? 'http://10.0.2.2:3333' : 'http://localhost:3333';
+  process.env.EXPO_PUBLIC_API_BASE_URL ??
+  (Platform.OS === 'android' ? 'http://10.0.2.2:3333' : 'http://localhost:3333');
 
 export type CatalogItem = {
   tmdbId: number;
@@ -100,10 +105,21 @@ export type RemoveUserListItemByTitleParams = {
   status: UserTitleStatus;
 };
 
-async function request<T>(path: string, options?: RequestInit): Promise<T> {
+export async function request<T>(path: string, options?: RequestInit): Promise<T> {
+  const token = await AsyncStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
+  const headers = new Headers(options?.headers);
+
+  if (options?.body && !headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json');
+  }
+
+  if (token && !headers.has('Authorization')) {
+    headers.set('Authorization', `Bearer ${token}`);
+  }
+
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
-    headers: options?.body ? { 'Content-Type': 'application/json', ...options.headers } : options?.headers,
+    headers,
   });
 
   if (!response.ok) {

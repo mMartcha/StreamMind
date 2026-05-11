@@ -1,8 +1,10 @@
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 
+import { AuthProvider, useAuth } from '@/src/contexts/AuthContext';
 import { theme } from '@/theme';
 
 export default function RootLayout() {
@@ -23,19 +25,56 @@ export default function RootLayout() {
   }
 
   return (
-    <>
+    <AuthProvider>
       <StatusBar style="light" />
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: theme.colors.background },
-          animation: 'fade',
-        }}>
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="content/[id]" />
-        <Stack.Screen name="streamings" />
-      </Stack>
-    </>
+      <RootNavigator />
+    </AuthProvider>
+  );
+}
+
+function RootNavigator() {
+  const { isAuthenticated, isLoading } = useAuth();
+  const router = useRouter();
+  const segments = useSegments();
+  const currentRoute = segments[0];
+  const isAuthRoute = currentRoute === 'login' || currentRoute === 'register';
+
+  useEffect(() => {
+    if (isLoading) {
+      return;
+    }
+
+    if (!isAuthenticated && !isAuthRoute) {
+      router.replace('/login');
+      return;
+    }
+
+    if (isAuthenticated && isAuthRoute) {
+      router.replace('/(tabs)');
+    }
+  }, [isAuthenticated, isAuthRoute, isLoading, router]);
+
+  if (isLoading) {
+    return (
+      <View style={styles.loadingScreen}>
+        <ActivityIndicator color={theme.colors.primary} />
+      </View>
+    );
+  }
+
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        contentStyle: { backgroundColor: theme.colors.background },
+        animation: 'fade',
+      }}>
+      <Stack.Screen name="login" />
+      <Stack.Screen name="register" />
+      <Stack.Screen name="(tabs)" />
+      <Stack.Screen name="content/[id]" />
+      <Stack.Screen name="streamings" />
+    </Stack>
   );
 }
 

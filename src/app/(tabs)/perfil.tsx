@@ -5,6 +5,7 @@ import { useCallback, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText, Chip, PosterCard, Screen, SectionHeader } from '@/src/components';
+import { useAuth } from '@/src/contexts/AuthContext';
 import {
   CatalogContentItem,
   UserListStats,
@@ -22,6 +23,7 @@ const emptyStats: UserListStats = {
 
 export default function ProfileScreen() {
   const router = useRouter();
+  const { user, signOut } = useAuth();
   const [stats, setStats] = useState<UserListStats>(emptyStats);
   const [watchLater, setWatchLater] = useState<CatalogContentItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -66,6 +68,18 @@ export default function ProfileScreen() {
     }, []),
   );
 
+  async function handleSignOut() {
+    await signOut();
+    router.replace('/login');
+  }
+
+  const initials = user?.name
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join('') || 'SM';
+
   return (
     <Screen>
       <SectionHeader
@@ -75,11 +89,11 @@ export default function ProfileScreen() {
 
       <View style={styles.hero}>
         <View style={styles.avatar}>
-          <AppText style={styles.avatarText}>MM</AppText>
+          <AppText style={styles.avatarText}>{initials}</AppText>
         </View>
         <View style={styles.heroText}>
-          <AppText style={styles.name}>Marcello</AppText>
-          <AppText style={styles.caption}>Curte ficcao cientifica, suspense e dramas intensos.</AppText>
+          <AppText style={styles.name}>{user?.name ?? 'Usuario'}</AppText>
+          <AppText style={styles.caption}>{user?.email ?? 'Sessao ativa no StreamMind.'}</AppText>
         </View>
       </View>
 
@@ -91,6 +105,11 @@ export default function ProfileScreen() {
           </AppText>
         </View>
         <Ionicons name="chevron-forward" size={20} color={theme.colors.primarySoft} />
+      </Pressable>
+
+      <Pressable onPress={handleSignOut} style={styles.logoutButton}>
+        <Ionicons name="log-out-outline" size={18} color={theme.colors.danger} />
+        <AppText style={styles.logoutText}>Sair da conta</AppText>
       </Pressable>
 
       <View style={styles.statsRow}>
@@ -194,6 +213,21 @@ const styles = StyleSheet.create({
     color: theme.colors.textMuted,
     fontSize: theme.fonts.sm,
     lineHeight: 20,
+  },
+  logoutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    borderRadius: theme.radius.pill,
+    borderWidth: 1,
+    borderColor: '#ff7d9044',
+    paddingVertical: 12,
+  },
+  logoutText: {
+    color: theme.colors.danger,
+    fontSize: theme.fonts.sm,
+    fontFamily: theme.fonts.family.semibold,
   },
   statsRow: {
     flexDirection: 'row',
