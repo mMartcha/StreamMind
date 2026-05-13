@@ -1,18 +1,22 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Platform } from 'react-native';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { create } from "axios";
 
-import { ContentItem } from '@/src/data/content';
+import { ContentItem } from "@/src/data/content";
 
-export const AUTH_TOKEN_STORAGE_KEY = '@streammind:auth_token';
-export const AUTH_USER_STORAGE_KEY = '@streammind:auth_user';
+export const AUTH_TOKEN_STORAGE_KEY = "@streammind:auth_token";
+export const AUTH_USER_STORAGE_KEY = "@streammind:auth_user";
 
 export const API_BASE_URL =
-  process.env.EXPO_PUBLIC_API_BASE_URL ??
-  (Platform.OS === 'android' ? 'http://10.0.2.2:3333' : 'http://localhost:3333');
+  process.env.EXPO_PUBLIC_API_BASE_URL ?? "http://10.0.2.2:3333";
+
+export const api = create({
+  baseURL: API_BASE_URL,
+  timeout: 10000,
+});
 
 export type CatalogItem = {
   tmdbId: number;
-  mediaType: 'movie' | 'tv';
+  mediaType: "movie" | "tv";
   title: string;
   overview: string;
   posterUrl: string;
@@ -27,14 +31,14 @@ export type Genre = {
 };
 
 export type MovieDetails = CatalogItem & {
-  mediaType: 'movie';
+  mediaType: "movie";
   genres: Genre[];
   runtime: number;
   status: string;
 };
 
 export type TvDetails = CatalogItem & {
-  mediaType: 'tv';
+  mediaType: "tv";
   genres: Genre[];
   numberOfSeasons: number;
   numberOfEpisodes: number;
@@ -58,15 +62,15 @@ export type ProvidersResponse = {
 
 export type CatalogContentItem = ContentItem & {
   tmdbId: number;
-  mediaType: CatalogItem['mediaType'];
+  mediaType: CatalogItem["mediaType"];
   releaseDate: string;
   voteAverage: number;
   status?: string;
 };
 
-export type UserTitleStatus = 'FAVORITE' | 'WATCHLIST' | 'WATCHED';
+export type UserTitleStatus = "FAVORITE" | "WATCHLIST" | "WATCHED";
 
-export type UserTitleMediaType = 'MOVIE' | 'TV';
+export type UserTitleMediaType = "MOVIE" | "TV";
 
 export type UserTitleItem = {
   id: string;
@@ -105,16 +109,19 @@ export type RemoveUserListItemByTitleParams = {
   status: UserTitleStatus;
 };
 
-export async function request<T>(path: string, options?: RequestInit): Promise<T> {
+export async function request<T>(
+  path: string,
+  options?: RequestInit,
+): Promise<T> {
   const token = await AsyncStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
   const headers = new Headers(options?.headers);
 
-  if (options?.body && !headers.has('Content-Type')) {
-    headers.set('Content-Type', 'application/json');
+  if (options?.body && !headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
   }
 
-  if (token && !headers.has('Authorization')) {
-    headers.set('Authorization', `Bearer ${token}`);
+  if (token && !headers.has("Authorization")) {
+    headers.set("Authorization", `Bearer ${token}`);
   }
 
   const response = await fetch(`${API_BASE_URL}${path}`, {
@@ -140,11 +147,13 @@ export async function request<T>(path: string, options?: RequestInit): Promise<T
 }
 
 export function getTrending() {
-  return request<CatalogItem[]>('/catalog/trending');
+  return request<CatalogItem[]>("/catalog/trending");
 }
 
 export function searchCatalog(query: string) {
-  return request<CatalogItem[]>(`/catalog/search?query=${encodeURIComponent(query)}`);
+  return request<CatalogItem[]>(
+    `/catalog/search?query=${encodeURIComponent(query)}`,
+  );
 }
 
 export function getMovieDetails(id: number) {
@@ -164,25 +173,27 @@ export function getTvProviders(id: number) {
 }
 
 export function getUserLists(status?: UserTitleStatus) {
-  const query = status ? `?status=${encodeURIComponent(status)}` : '';
+  const query = status ? `?status=${encodeURIComponent(status)}` : "";
 
   return request<UserTitleItem[]>(`/user-lists${query}`);
 }
 
 export function addUserListItem(data: CreateUserTitlePayload) {
-  return request<UserTitleItem>('/user-lists', {
-    method: 'POST',
+  return request<UserTitleItem>("/user-lists", {
+    method: "POST",
     body: JSON.stringify(data),
   });
 }
 
 export function removeUserListItemById(id: string) {
   return request<void>(`/user-lists/${encodeURIComponent(id)}`, {
-    method: 'DELETE',
+    method: "DELETE",
   });
 }
 
-export function removeUserListItemByTitle(params: RemoveUserListItemByTitleParams) {
+export function removeUserListItemByTitle(
+  params: RemoveUserListItemByTitleParams,
+) {
   const searchParams = new URLSearchParams({
     tmdbId: String(params.tmdbId),
     mediaType: params.mediaType,
@@ -190,33 +201,40 @@ export function removeUserListItemByTitle(params: RemoveUserListItemByTitleParam
   });
 
   return request<void>(`/user-lists?${searchParams.toString()}`, {
-    method: 'DELETE',
+    method: "DELETE",
   });
 }
 
 export function getUserListStats() {
-  return request<UserListStats>('/user-lists/stats');
+  return request<UserListStats>("/user-lists/stats");
 }
 
-export function toUserTitleMediaType(mediaType: CatalogItem['mediaType']): UserTitleMediaType {
-  return mediaType === 'movie' ? 'MOVIE' : 'TV';
+export function toUserTitleMediaType(
+  mediaType: CatalogItem["mediaType"],
+): UserTitleMediaType {
+  return mediaType === "movie" ? "MOVIE" : "TV";
 }
 
-export function toCatalogMediaType(mediaType: UserTitleMediaType): CatalogItem['mediaType'] {
-  return mediaType === 'MOVIE' ? 'movie' : 'tv';
+export function toCatalogMediaType(
+  mediaType: UserTitleMediaType,
+): CatalogItem["mediaType"] {
+  return mediaType === "MOVIE" ? "movie" : "tv";
 }
 
-export function toContentItem(item: CatalogItem | MovieDetails | TvDetails): CatalogContentItem {
+export function toContentItem(
+  item: CatalogItem | MovieDetails | TvDetails,
+): CatalogContentItem {
   const year = Number(item.releaseDate?.slice(0, 4)) || 0;
-  const genres = 'genres' in item ? item.genres.map((genre) => genre.name) : ['Catalogo'];
+  const genres =
+    "genres" in item ? item.genres.map((genre) => genre.name) : ["Catalogo"];
   const duration =
-    item.mediaType === 'movie' && 'runtime' in item
+    item.mediaType === "movie" && "runtime" in item
       ? `${item.runtime} min`
-      : item.mediaType === 'tv' && 'numberOfSeasons' in item
-        ? `${item.numberOfSeasons} temporada${item.numberOfSeasons === 1 ? '' : 's'}`
-        : item.mediaType === 'movie'
-          ? 'Filme'
-          : 'Serie';
+      : item.mediaType === "tv" && "numberOfSeasons" in item
+        ? `${item.numberOfSeasons} temporada${item.numberOfSeasons === 1 ? "" : "s"}`
+        : item.mediaType === "movie"
+          ? "Filme"
+          : "Serie";
 
   return {
     id: `${item.mediaType}-${item.tmdbId}`,
@@ -224,13 +242,13 @@ export function toContentItem(item: CatalogItem | MovieDetails | TvDetails): Cat
     mediaType: item.mediaType,
     releaseDate: item.releaseDate,
     voteAverage: item.voteAverage,
-    status: 'status' in item ? item.status : undefined,
+    status: "status" in item ? item.status : undefined,
     title: item.title,
     year,
     duration,
-    genre: genres.length > 0 ? genres : ['Catalogo'],
+    genre: genres.length > 0 ? genres : ["Catalogo"],
     imdb: Number(item.voteAverage.toFixed(1)),
-    type: item.mediaType === 'movie' ? 'Filme' : 'Serie',
+    type: item.mediaType === "movie" ? "Filme" : "Serie",
     poster: item.posterUrl,
     backdrop: item.backdropUrl || item.posterUrl,
     shortSynopsis: item.overview,
@@ -240,7 +258,9 @@ export function toContentItem(item: CatalogItem | MovieDetails | TvDetails): Cat
   };
 }
 
-export function toContentItemFromUserList(item: UserTitleItem): CatalogContentItem {
+export function toContentItemFromUserList(
+  item: UserTitleItem,
+): CatalogContentItem {
   const mediaType = toCatalogMediaType(item.mediaType);
   const year = Number(item.releaseDate?.slice(0, 4)) || 0;
 
@@ -253,10 +273,10 @@ export function toContentItemFromUserList(item: UserTitleItem): CatalogContentIt
     status: item.status,
     title: item.title,
     year,
-    duration: mediaType === 'movie' ? 'Filme' : 'Serie',
-    genre: ['Catalogo'],
+    duration: mediaType === "movie" ? "Filme" : "Serie",
+    genre: ["Catalogo"],
     imdb: Number(item.voteAverage?.toFixed(1)) || 0,
-    type: mediaType === 'movie' ? 'Filme' : 'Serie',
+    type: mediaType === "movie" ? "Filme" : "Serie",
     poster: item.posterUrl,
     backdrop: item.backdropUrl || item.posterUrl,
     shortSynopsis: item.overview,
@@ -267,10 +287,13 @@ export function toContentItemFromUserList(item: UserTitleItem): CatalogContentIt
 }
 
 export function parseContentRouteId(routeId?: string) {
-  const [mediaType, rawId] = routeId?.split('-') ?? [];
+  const [mediaType, rawId] = routeId?.split("-") ?? [];
   const tmdbId = Number(rawId);
 
-  if ((mediaType === 'movie' || mediaType === 'tv') && Number.isFinite(tmdbId)) {
+  if (
+    (mediaType === "movie" || mediaType === "tv") &&
+    Number.isFinite(tmdbId)
+  ) {
     return { mediaType, tmdbId } as const;
   }
 

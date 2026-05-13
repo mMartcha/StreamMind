@@ -1,17 +1,17 @@
-import { Ionicons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
-import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { useFocusEffect } from '@react-navigation/native';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Ionicons } from "@expo/vector-icons";
+import { useFocusEffect } from "@react-navigation/native";
+import { Image } from "expo-image";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 
-import { AppText, HorizontalRail, SectionHeader } from '@/src/components';
+import { AppText, HorizontalRail, SectionHeader } from "@/src/components";
 import {
   CatalogContentItem,
-  UserTitleItem,
-  UserTitleStatus,
   ProvidersResponse,
   StreamingProvider,
+  UserTitleItem,
+  UserTitleStatus,
   addUserListItem,
   getMovieDetails,
   getMovieProviders,
@@ -24,8 +24,8 @@ import {
   removeUserListItemByTitle,
   toContentItem,
   toUserTitleMediaType,
-} from '@/src/services/api';
-import { theme } from '@/theme';
+} from "@/src/services/api";
+import { theme } from "@/theme";
 
 const userListActions: {
   status: UserTitleStatus;
@@ -35,25 +35,25 @@ const userListActions: {
   inactiveIcon: keyof typeof Ionicons.glyphMap;
 }[] = [
   {
-    status: 'FAVORITE',
-    label: 'Favoritar',
-    activeLabel: 'Favorito',
-    icon: 'heart',
-    inactiveIcon: 'heart-outline',
+    status: "FAVORITE",
+    label: "Favoritar",
+    activeLabel: "Favorito",
+    icon: "heart",
+    inactiveIcon: "heart-outline",
   },
   {
-    status: 'WATCHLIST',
-    label: 'Quero assistir',
-    activeLabel: 'Na lista',
-    icon: 'bookmark',
-    inactiveIcon: 'bookmark-outline',
+    status: "WATCHLIST",
+    label: "Quero assistir",
+    activeLabel: "Na lista",
+    icon: "bookmark",
+    inactiveIcon: "bookmark-outline",
   },
   {
-    status: 'WATCHED',
-    label: 'Assistido',
-    activeLabel: 'Assistido',
-    icon: 'checkmark-circle',
-    inactiveIcon: 'checkmark-circle-outline',
+    status: "WATCHED",
+    label: "Assistido",
+    activeLabel: "Assistido",
+    icon: "checkmark-circle",
+    inactiveIcon: "checkmark-circle-outline",
   },
 ];
 
@@ -73,8 +73,11 @@ export default function ContentDetailsScreen() {
   const [providers, setProviders] = useState<ProvidersResponse | null>(null);
   const [related, setRelated] = useState<CatalogContentItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [userListState, setUserListState] = useState<UserListState>(emptyUserListState);
-  const [pendingStatus, setPendingStatus] = useState<UserTitleStatus | null>(null);
+  const [userListState, setUserListState] =
+    useState<UserListState>(emptyUserListState);
+  const [pendingStatus, setPendingStatus] = useState<UserTitleStatus | null>(
+    null,
+  );
   const [error, setError] = useState<string | null>(null);
   const routeInfo = useMemo(() => parseContentRouteId(id), [id]);
 
@@ -83,7 +86,7 @@ export default function ContentDetailsScreen() {
 
     async function loadDetails() {
       if (!routeInfo) {
-        setError('Conteudo nao encontrado.');
+        setError("Conteudo nao encontrado.");
         setIsLoading(false);
         return;
       }
@@ -93,7 +96,7 @@ export default function ContentDetailsScreen() {
         setError(null);
 
         const details =
-          routeInfo.mediaType === 'movie'
+          routeInfo.mediaType === "movie"
             ? await getMovieDetails(routeInfo.tmdbId)
             : await getTvDetails(routeInfo.tmdbId);
 
@@ -102,7 +105,7 @@ export default function ContentDetailsScreen() {
         }
 
         const [providersResult, trendingResult] = await Promise.allSettled([
-          routeInfo.mediaType === 'movie'
+          routeInfo.mediaType === "movie"
             ? getMovieProviders(routeInfo.tmdbId)
             : getTvProviders(routeInfo.tmdbId),
           getTrending(),
@@ -112,9 +115,11 @@ export default function ContentDetailsScreen() {
           return;
         }
 
-        setProviders(providersResult.status === 'fulfilled' ? providersResult.value : null);
+        setProviders(
+          providersResult.status === "fulfilled" ? providersResult.value : null,
+        );
         setRelated(
-          trendingResult.status === 'fulfilled'
+          trendingResult.status === "fulfilled"
             ? trendingResult.value
                 .filter((entry) => entry.tmdbId !== routeInfo.tmdbId)
                 .slice(0, 4)
@@ -123,7 +128,7 @@ export default function ContentDetailsScreen() {
         );
       } catch {
         if (isMounted) {
-          setError('Nao foi possivel carregar os detalhes agora.');
+          setError("Nao foi possivel carregar os detalhes agora.");
         }
       } finally {
         if (isMounted) {
@@ -162,21 +167,21 @@ export default function ContentDetailsScreen() {
                 (entry) =>
                   entry.tmdbId === routeInfo.tmdbId &&
                   entry.mediaType === mediaType &&
-                  entry.status === 'FAVORITE',
+                  entry.status === "FAVORITE",
               ) ?? null,
             WATCHLIST:
               lists.find(
                 (entry) =>
                   entry.tmdbId === routeInfo.tmdbId &&
                   entry.mediaType === mediaType &&
-                  entry.status === 'WATCHLIST',
+                  entry.status === "WATCHLIST",
               ) ?? null,
             WATCHED:
               lists.find(
                 (entry) =>
                   entry.tmdbId === routeInfo.tmdbId &&
                   entry.mediaType === mediaType &&
-                  entry.status === 'WATCHED',
+                  entry.status === "WATCHED",
               ) ?? null,
           });
         } catch {
@@ -209,7 +214,11 @@ export default function ContentDetailsScreen() {
         if (currentItem.id) {
           await removeUserListItemById(currentItem.id);
         } else {
-          await removeUserListItemByTitle({ tmdbId: item.tmdbId, mediaType, status });
+          await removeUserListItemByTitle({
+            tmdbId: item.tmdbId,
+            mediaType,
+            status,
+          });
         }
 
         setUserListState((current) => ({ ...current, [status]: null }));
@@ -230,7 +239,7 @@ export default function ContentDetailsScreen() {
 
       setUserListState((current) => ({ ...current, [status]: createdItem }));
     } catch {
-      setError('Nao foi possivel atualizar sua lista agora.');
+      setError("Nao foi possivel atualizar sua lista agora.");
     } finally {
       setPendingStatus(null);
     }
@@ -244,9 +253,16 @@ export default function ContentDetailsScreen() {
       <ScrollView
         style={styles.container}
         contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.posterWrap}>
-          {item && <Image source={{ uri: item.backdrop }} style={styles.backdrop} contentFit="cover" />}
+          {item && (
+            <Image
+              source={{ uri: item.backdrop }}
+              style={styles.backdrop}
+              contentFit="cover"
+            />
+          )}
           <View style={styles.posterShade} />
           <Pressable onPress={() => router.back()} style={styles.backButton}>
             <Ionicons name="arrow-back" size={18} color={theme.colors.text} />
@@ -257,13 +273,17 @@ export default function ContentDetailsScreen() {
               <AppText style={styles.meta}>
                 {item.type} - {item.year} - {item.duration}
               </AppText>
-              <AppText style={styles.genres}>{item.genre.join('  -  ')}</AppText>
+              <AppText style={styles.genres}>
+                {item.genre.join("  -  ")}
+              </AppText>
             </View>
           )}
         </View>
 
         <View style={styles.panel}>
-          {isLoading && <AppText style={styles.feedback}>Carregando detalhes...</AppText>}
+          {isLoading && (
+            <AppText style={styles.feedback}>Carregando detalhes...</AppText>
+          )}
           {error && <AppText style={styles.feedback}>{error}</AppText>}
 
           {item && (
@@ -275,7 +295,9 @@ export default function ContentDetailsScreen() {
                 </View>
                 <View style={styles.scoreCard}>
                   <AppText style={styles.scoreLabel}>Status</AppText>
-                  <AppText style={styles.scoreValueMuted}>{item.status ?? item.duration}</AppText>
+                  <AppText style={styles.scoreValueMuted}>
+                    {item.status ?? item.duration}
+                  </AppText>
                 </View>
               </View>
 
@@ -293,14 +315,24 @@ export default function ContentDetailsScreen() {
                         styles.actionButton,
                         isActive && styles.actionButtonActive,
                         isPending && styles.actionButtonPending,
-                      ]}>
+                      ]}
+                    >
                       <Ionicons
                         name={isActive ? action.icon : action.inactiveIcon}
                         size={18}
-                        color={isActive ? '#111' : theme.colors.text}
+                        color={isActive ? "#111" : theme.colors.text}
                       />
-                      <AppText style={[styles.actionText, isActive && styles.actionTextActive]}>
-                        {isPending ? '...' : isActive ? action.activeLabel : action.label}
+                      <AppText
+                        style={[
+                          styles.actionText,
+                          isActive && styles.actionTextActive,
+                        ]}
+                      >
+                        {isPending
+                          ? "..."
+                          : isActive
+                            ? action.activeLabel
+                            : action.label}
                       </AppText>
                     </Pressable>
                   );
@@ -308,22 +340,33 @@ export default function ContentDetailsScreen() {
               </View>
 
               <View style={styles.block}>
-                <SectionHeader title="Sinopse" subtitle="Resumo oficial carregado pelo catalogo." />
+                <SectionHeader
+                  title="Sinopse"
+                  subtitle="Resumo oficial carregado pelo catalogo."
+                />
                 <AppText style={styles.paragraph}>{item.aiSynopsis}</AppText>
               </View>
 
               <View style={styles.block}>
-                <SectionHeader title="Disponivel em" subtitle="A tela de detalhes funciona como ponte para os servicos externos." />
+                <SectionHeader
+                  title="Disponivel em"
+                  subtitle="A tela de detalhes funciona como ponte para os servicos externos."
+                />
                 {flatrateProviders.length > 0 ? (
                   <ProviderRow providers={flatrateProviders} />
                 ) : (
-                  <AppText style={styles.paragraph}>Nao disponivel por assinatura no Brasil.</AppText>
+                  <AppText style={styles.paragraph}>
+                    Nao disponivel por assinatura no Brasil.
+                  </AppText>
                 )}
               </View>
 
               {related.length > 0 && (
                 <View style={styles.block}>
-                  <SectionHeader title="Relacionados" subtitle="Continuando sua descoberta dentro do StreamMind." />
+                  <SectionHeader
+                    title="Relacionados"
+                    subtitle="Continuando sua descoberta dentro do StreamMind."
+                  />
                   <HorizontalRail items={related} />
                 </View>
               )}
@@ -341,7 +384,11 @@ function ProviderRow({ providers }: { providers: StreamingProvider[] }) {
       {providers.map((provider) => (
         <View key={provider.id} style={styles.castChip}>
           {provider.logoUrl ? (
-            <Image source={{ uri: provider.logoUrl }} style={styles.providerLogo} contentFit="contain" />
+            <Image
+              source={{ uri: provider.logoUrl }}
+              style={styles.providerLogo}
+              contentFit="contain"
+            />
           ) : null}
           <AppText style={styles.castText}>{provider.name}</AppText>
         </View>
@@ -360,14 +407,14 @@ const styles = StyleSheet.create({
   },
   posterWrap: {
     minHeight: 390,
-    justifyContent: 'space-between',
+    justifyContent: "space-between",
   },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
   },
   posterShade: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(10, 10, 10, 0.42)',
+    backgroundColor: "rgba(10, 10, 10, 0.42)",
   },
   backButton: {
     marginTop: 54,
@@ -375,11 +422,11 @@ const styles = StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 21,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     backgroundColor: theme.colors.surfaceGlass,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.16)',
+    borderColor: "rgba(255,255,255,0.16)",
   },
   posterContent: {
     paddingHorizontal: theme.spacing.lg,
@@ -387,12 +434,12 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   title: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 30,
     fontFamily: theme.fonts.family.bold,
   },
   meta: {
-    color: '#ece4f9',
+    color: "#ece4f9",
     fontSize: theme.fonts.md,
     fontFamily: theme.fonts.family.medium,
   },
@@ -410,7 +457,7 @@ const styles = StyleSheet.create({
     gap: theme.spacing.lg,
   },
   scoreRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 12,
   },
   scoreCard: {
@@ -437,13 +484,13 @@ const styles = StyleSheet.create({
     fontFamily: theme.fonts.family.bold,
   },
   actionRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: 10,
   },
   actionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
     borderRadius: theme.radius.pill,
     borderWidth: 1,
@@ -465,7 +512,7 @@ const styles = StyleSheet.create({
     fontFamily: theme.fonts.family.semibold,
   },
   actionTextActive: {
-    color: '#111',
+    color: "#111",
   },
   block: {
     gap: 12,
@@ -476,13 +523,13 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   castRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: 10,
   },
   castChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 10,
     paddingHorizontal: 14,
     paddingVertical: 10,
