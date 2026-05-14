@@ -13,10 +13,9 @@ import {
 import {
   CatalogContentItem,
   MovieDetails,
-  getTrending,
   toContentItem,
 } from "@/src/services/api";
-import { getMovieById } from "@/src/services/catalog.service";
+import { getMovieById, getTrending } from "@/src/services/catalog.service";
 import { theme } from "@/theme";
 
 export default function HomeScreen() {
@@ -74,6 +73,7 @@ export default function HomeScreen() {
         }
       } catch {
         if (isMounted) {
+          setItems([]);
           setError("Nao foi possivel carregar o catalogo agora.");
         }
       } finally {
@@ -159,6 +159,9 @@ export default function HomeScreen() {
         <AppText style={styles.feedback}>Carregando catalogo...</AppText>
       )}
       {error && <AppText style={styles.feedback}>{error}</AppText>}
+      {!isLoading && !error && items.length === 0 && (
+        <AppText style={styles.feedback}>Nenhum titulo encontrado agora.</AppText>
+      )}
       {featured && <HeroCard item={featured} />}
 
       <View style={styles.section}>
