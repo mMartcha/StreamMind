@@ -12,10 +12,9 @@ import {
 } from "@/src/components";
 import {
   CatalogContentItem,
-  MovieDetails,
   toContentItem,
 } from "@/src/services/api";
-import { getMovieById, getTrending } from "@/src/services/catalog.service";
+import { getTrending } from "@/src/services/catalog.service";
 import { theme } from "@/theme";
 
 export default function HomeScreen() {
@@ -23,42 +22,7 @@ export default function HomeScreen() {
   const [items, setItems] = useState<CatalogContentItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [testMovie, setTestMovie] = useState<MovieDetails | null>(null);
-  const [isTestMovieLoading, setIsTestMovieLoading] = useState(true);
-  const [testMovieError, setTestMovieError] = useState<string | null>(null);
 
-  useEffect(() => {
-    let isMounted = true;
-
-    async function testBackendConnection() {
-      try {
-        setIsTestMovieLoading(true);
-        setTestMovieError(null);
-        const movie = await getMovieById(550);
-
-        if (isMounted) {
-          setTestMovie(movie);
-          console.log("Filme recebido do backend:", movie);
-        }
-      } catch (error) {
-        if (isMounted) {
-          setTestMovie(null);
-          setTestMovieError("Não foi possível buscar o filme 550 no backend.");
-          console.log("Erro ao conectar com o backend:", error);
-        }
-      } finally {
-        if (isMounted) {
-          setIsTestMovieLoading(false);
-        }
-      }
-    }
-
-    testBackendConnection();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
 
   useEffect(() => {
     let isMounted = true;

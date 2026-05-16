@@ -11,6 +11,7 @@ import {
   StyleSheet,
   View
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AppText, Screen } from "@/src/components";
 import {
@@ -306,6 +307,7 @@ function createMockRecommendations(
 
 export default function AIScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [watchedMovies, setWatchedMovies] = useState<WatchedMovie[]>([]);
   const [isWatchedLoading, setIsWatchedLoading] = useState(true);
   const [watchedError, setWatchedError] = useState<string | null>(null);
@@ -585,7 +587,12 @@ export default function AIScreen() {
         onRequestClose={closeRecommendationModal}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalSheet}>
+          <View
+            style={[
+              styles.modalSheet,
+              { paddingBottom: theme.spacing.lg + insets.bottom },
+            ]}
+          >
             <View style={styles.modalHeader}>
               <View>
                 <AppText style={styles.modalTitle}>
@@ -747,7 +754,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     paddingHorizontal: theme.spacing.lg,
-    paddingTop: theme.spacing.top,
+    paddingTop: theme.spacing.lg,
     paddingBottom: theme.spacing.lg,
     gap: theme.spacing.lg,
   },

@@ -4,6 +4,7 @@ import { Image } from "expo-image";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AppText, HorizontalRail, SectionHeader } from "@/src/components";
 import {
@@ -68,6 +69,7 @@ const emptyUserListState: UserListState = {
 export default function ContentDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   const [item, setItem] = useState<CatalogContentItem | null>(null);
   const [providers, setProviders] = useState<ProvidersResponse | null>(null);
@@ -252,7 +254,10 @@ export default function ContentDetailsScreen() {
       <Stack.Screen options={{ headerShown: false }} />
       <ScrollView
         style={styles.container}
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[
+          styles.content,
+          { paddingBottom: theme.spacing.xxl + insets.bottom },
+        ]}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.posterWrap}>
@@ -264,7 +269,10 @@ export default function ContentDetailsScreen() {
             />
           )}
           <View style={styles.posterShade} />
-          <Pressable onPress={() => router.back()} style={styles.backButton}>
+          <Pressable
+            onPress={() => router.back()}
+            style={[styles.backButton, { marginTop: insets.top + 14 }]}
+          >
             <Ionicons name="arrow-back" size={18} color={theme.colors.text} />
           </Pressable>
           {item && (

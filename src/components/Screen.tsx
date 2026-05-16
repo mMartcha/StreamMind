@@ -1,4 +1,5 @@
 import { ScrollView, StyleSheet, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { theme } from '@/theme';
 
@@ -10,16 +11,22 @@ export function Screen({
   scroll?: boolean;
 }) {
   if (!scroll) {
-    return <View style={styles.screen}>{children}</View>;
+    return (
+      <SafeAreaView style={styles.screen} edges={['top', 'right', 'bottom', 'left']}>
+        <View style={styles.content}>{children}</View>
+      </SafeAreaView>
+    );
   }
 
   return (
-    <ScrollView
-      style={styles.screen}
-      contentContainerStyle={styles.scrollContent}
-      showsVerticalScrollIndicator={false}>
-      {children}
-    </ScrollView>
+    <SafeAreaView style={styles.screen} edges={['top', 'right', 'bottom', 'left']}>
+      <ScrollView
+        style={styles.content}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}>
+        {children}
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
@@ -28,9 +35,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background,
   },
+  content: {
+    flex: 1,
+  },
   scrollContent: {
     paddingHorizontal: theme.spacing.lg,
-    paddingTop: theme.spacing.top,
+    paddingTop: theme.spacing.lg,
     paddingBottom: theme.spacing.xxl,
     gap: theme.spacing.lg,
   },
