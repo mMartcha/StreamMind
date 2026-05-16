@@ -1,10 +1,10 @@
-import { Image } from "expo-image";
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 
 import {
   AppText,
-  Chip,
   HeroCard,
   HorizontalRail,
   Screen,
@@ -19,6 +19,7 @@ import { getMovieById, getTrending } from "@/src/services/catalog.service";
 import { theme } from "@/theme";
 
 export default function HomeScreen() {
+  const router = useRouter();
   const [items, setItems] = useState<CatalogContentItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -42,7 +43,7 @@ export default function HomeScreen() {
       } catch (error) {
         if (isMounted) {
           setTestMovie(null);
-          setTestMovieError("Nao foi possivel buscar o filme 550 no backend.");
+          setTestMovieError("Não foi possível buscar o filme 550 no backend.");
           console.log("Erro ao conectar com o backend:", error);
         }
       } finally {
@@ -74,7 +75,7 @@ export default function HomeScreen() {
       } catch {
         if (isMounted) {
           setItems([]);
-          setError("Nao foi possivel carregar o catalogo agora.");
+          setError("Não foi possível carregar o catálogo agora.");
         }
       } finally {
         if (isMounted) {
@@ -91,7 +92,6 @@ export default function HomeScreen() {
   }, []);
 
   const featured = items[0];
-  const recommended = items.slice(0, 6);
   const trending = items;
 
   return (
@@ -106,99 +106,82 @@ export default function HomeScreen() {
         </AppText>
       </View>
 
-      <View style={styles.backendTestCard}>
-        <AppText style={styles.backendTestTitle}>Teste backend local</AppText>
-        {isTestMovieLoading && (
-          <AppText style={styles.feedback}>Buscando filme 550...</AppText>
-        )}
-        {testMovieError && (
-          <AppText style={styles.feedback}>{testMovieError}</AppText>
-        )}
-        {testMovie && (
-          <View style={styles.backendMovieRow}>
-            {testMovie.posterUrl && (
-              <Image
-                source={{ uri: testMovie.posterUrl }}
-                style={styles.backendPoster}
-                contentFit="cover"
-              />
-            )}
-            <View style={styles.backendMovieInfo}>
-              <AppText style={styles.backendMovieTitle}>
-                {testMovie.title}
-              </AppText>
-              {!!testMovie.overview && (
-                <AppText style={styles.backendOverview}>
-                  {testMovie.overview}
-                </AppText>
-              )}
-              <View style={styles.backendMetaList}>
-                {!!testMovie.releaseDate && (
-                  <AppText style={styles.backendMeta}>
-                    Lancamento: {testMovie.releaseDate}
-                  </AppText>
-                )}
-                {typeof testMovie.voteAverage === "number" && (
-                  <AppText style={styles.backendMeta}>
-                    Nota media: {testMovie.voteAverage.toFixed(1)}
-                  </AppText>
-                )}
-                {testMovie.genres.length > 0 && (
-                  <AppText style={styles.backendMeta}>
-                    Generos:{" "}
-                    {testMovie.genres.map((genre) => genre.name).join(", ")}
-                  </AppText>
-                )}
-              </View>
-            </View>
-          </View>
-        )}
-      </View>
-
       {isLoading && (
-        <AppText style={styles.feedback}>Carregando catalogo...</AppText>
+        <AppText style={styles.feedback}>Carregando catálogo...</AppText>
       )}
       {error && <AppText style={styles.feedback}>{error}</AppText>}
       {!isLoading && !error && items.length === 0 && (
-        <AppText style={styles.feedback}>Nenhum titulo encontrado agora.</AppText>
+        <AppText style={styles.feedback}>
+          Nenhum título encontrado agora.
+        </AppText>
       )}
       {featured && <HeroCard item={featured} />}
 
       <View style={styles.section}>
         <SectionHeader
-          title="Generos em destaque"
-          subtitle="Atalhos rapidos para explorar sem perder tempo."
+          title="StreamMate"
+          subtitle="Receba sugestões personalizadas a partir do que você já assistiu."
         />
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.chips}
+        <Pressable
+          onPress={() => router.push("/ia")}
+          style={({ pressed }) => [
+            styles.aiAccessCard,
+            pressed && styles.aiAccessCardPressed,
+          ]}
         >
-          {[
-            "Suspense",
-            "Familia",
-            "Drama",
-            "Animacao",
-            "Acao",
-            "Ficcao Cientifica",
-          ].map((genre, index) => (
-            <Chip key={genre} label={genre} active={index === 0} />
-          ))}
-        </ScrollView>
-      </View>
+          <View style={styles.aiBadge}>
+            <Ionicons
+              name="sparkles"
+              size={15}
+              color={theme.colors.primarySoft}
+            />
+            <AppText style={styles.aiBadgeText}>
+              Recomendações interativas
+            </AppText>
+          </View>
+          <View style={styles.aiIconWrap}>
+            <Ionicons
+              name="sparkles"
+              size={22}
+              color={theme.colors.primarySoft}
+            />
+          </View>
+          <View style={styles.aiAccessContent}>
+            <AppText style={styles.aiAccessTitle}>
+              Descubra o próximo título com o StreamMate
+            </AppText>
+            <AppText style={styles.aiAccessText}>
+              Combine seus assistidos com um gênero desejado e receba uma
+              recomendação personalizada com justificativa.
+            </AppText>
+          </View>
+          <View style={styles.aiSteps}>
+            {["Escolha assistidos", "Defina o gênero", "Veja a explicação"].map(
+              (step, index) => (
+                <View key={step} style={styles.aiStepChip}>
+                  <AppText style={styles.aiStepNumber}>{index + 1}</AppText>
+                  <AppText style={styles.aiStepText}>{step}</AppText>
+                </View>
+              ),
+            )}
+          </View>
 
-      <View style={styles.section}>
-        <SectionHeader
-          title="Recomendados por IA"
-          subtitle="Selecao baseada em clima, genero e padroes do seu perfil."
-        />
-        <HorizontalRail items={recommended} />
+          <View style={styles.aiActionRow}>
+            <View style={styles.aiActionButton}>
+              <AppText style={styles.aiActionText}>
+                Interagir com o StreamMate
+              </AppText>
+              <Ionicons name="arrow-forward" size={17} color="#111" />
+            </View>
+          </View>
+          <AppText style={styles.aiHint}>Leva menos de 1 minuto</AppText>
+        </Pressable>
       </View>
 
       <View style={styles.section}>
         <SectionHeader
           title="Em alta"
-          subtitle="Titulos que estao puxando conversa agora."
+          subtitle="Títulos que estão puxando conversa agora."
         />
         <HorizontalRail items={trending} />
       </View>
@@ -229,13 +212,125 @@ const styles = StyleSheet.create({
   section: {
     gap: theme.spacing.md,
   },
-  chips: {
-    gap: 10,
-    paddingRight: theme.spacing.lg,
-  },
   feedback: {
     color: theme.colors.textMuted,
     fontSize: theme.fonts.md,
+  },
+  aiAccessCard: {
+    minHeight: 210,
+    alignItems: "stretch",
+    gap: theme.spacing.md,
+    backgroundColor: "#1a1124",
+    borderRadius: theme.radius.xl,
+    borderWidth: 1,
+    borderColor: "#8A2BE266",
+    padding: theme.spacing.lg,
+    ...theme.shadow.glow,
+  },
+  aiAccessCardPressed: {
+    opacity: 0.9,
+    transform: [{ scale: 0.99 }],
+  },
+  aiBadge: {
+    minHeight: 32,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 7,
+    alignSelf: "flex-start",
+    borderRadius: theme.radius.pill,
+    borderWidth: 1,
+    borderColor: "#8A2BE266",
+    backgroundColor: "rgba(202, 152, 255, 0.1)",
+    paddingHorizontal: 12,
+  },
+  aiBadgeText: {
+    color: theme.colors.primarySoft,
+    fontSize: theme.fonts.xsm,
+    fontFamily: theme.fonts.family.bold,
+  },
+  aiIconWrap: {
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    alignItems: "center",
+    justifyContent: "center",
+    alignSelf: "flex-start",
+    backgroundColor: "rgba(202, 152, 255, 0.12)",
+    borderWidth: 1,
+    borderColor: "#8A2BE288",
+  },
+  aiAccessContent: {
+    gap: theme.spacing.sm,
+  },
+  aiAccessTitle: {
+    color: theme.colors.text,
+    fontSize: theme.fonts.lg,
+    lineHeight: 26,
+    fontFamily: theme.fonts.family.bold,
+  },
+  aiAccessText: {
+    color: theme.colors.textMuted,
+    fontSize: theme.fonts.sm,
+    lineHeight: 20,
+  },
+  aiSteps: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  aiStepChip: {
+    minHeight: 34,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 7,
+    borderRadius: theme.radius.pill,
+    backgroundColor: "rgba(255, 255, 255, 0.07)",
+    paddingLeft: 6,
+    paddingRight: 12,
+  },
+  aiStepNumber: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    overflow: "hidden",
+    color: "#111",
+    backgroundColor: theme.colors.primarySoft,
+    textAlign: "center",
+    lineHeight: 22,
+    fontSize: theme.fonts.xsm,
+    fontFamily: theme.fonts.family.bold,
+  },
+  aiStepText: {
+    color: theme.colors.text,
+    fontSize: theme.fonts.xsm,
+    fontFamily: theme.fonts.family.semibold,
+  },
+  aiActionRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: theme.spacing.md,
+  },
+  aiActionButton: {
+    minHeight: 44,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    borderRadius: theme.radius.pill,
+    backgroundColor: theme.colors.primarySoft,
+    paddingHorizontal: theme.spacing.lg,
+  },
+  aiActionText: {
+    color: "#111",
+    fontSize: theme.fonts.sm,
+    fontFamily: theme.fonts.family.bold,
+  },
+  aiHint: {
+    flex: 1,
+    color: theme.colors.textSoft,
+    fontSize: theme.fonts.xsm,
+    textAlign: "right",
   },
   backendTestCard: {
     gap: theme.spacing.md,

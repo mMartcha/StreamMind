@@ -28,7 +28,7 @@ export default function FavoritesScreen() {
         } catch {
           if (isActive) {
             setFavorites([]);
-            setError('Nao foi possivel carregar seus favoritos agora.');
+            setError('Não foi possível carregar seus favoritos agora.');
           }
         } finally {
           if (isActive) {
@@ -49,13 +49,13 @@ export default function FavoritesScreen() {
     <Screen>
       <SectionHeader
         title="Favoritos"
-        subtitle="Sua selecao pessoal, com foco rapido em disponibilidade nas plataformas."
+        subtitle="Sua seleção pessoal, com foco rápido em disponibilidade nas plataformas."
       />
 
       <View style={styles.summaryCard}>
-        <AppText style={styles.summaryTitle}>3 titulos salvos estao em servicos que voce assina</AppText>
+        <AppText style={styles.summaryTitle}>3 títulos salvos estão em serviços que você assina</AppText>
         <AppText style={styles.summaryText}>
-          Prioridade hoje: continue de onde parou ou explore algo proximo do seu gosto.
+          Prioridade hoje: continue de onde parou ou explore algo próximo do seu gosto.
         </AppText>
       </View>
 

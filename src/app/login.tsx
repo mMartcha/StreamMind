@@ -33,7 +33,7 @@ export default function LoginScreen() {
         <AppText style={styles.brand}>
           Stream<AppText style={styles.innerBrand}>Mind</AppText>
         </AppText>
-        <AppText style={styles.subtitle}>Entre para acessar suas listas e preferencias.</AppText>
+        <AppText style={styles.subtitle}>Entre para acessar suas listas e preferências.</AppText>
       </View>
 
       <View style={styles.form}>
@@ -78,7 +78,7 @@ export default function LoginScreen() {
 
         <Link href="/register" asChild>
           <Pressable style={styles.linkButton}>
-            <AppText style={styles.linkText}>Ainda nao tenho conta</AppText>
+            <AppText style={styles.linkText}>Ainda não tenho conta</AppText>
           </Pressable>
         </Link>
       </View>

@@ -35,7 +35,7 @@ export default function SearchScreen() {
         }
       } catch {
         if (isMounted) {
-          setError('Nao foi possivel buscar no catalogo agora.');
+          setError('Não foi possível buscar no catálogo agora.');
           setResults([]);
         }
       } finally {
@@ -55,13 +55,13 @@ export default function SearchScreen() {
     <Screen>
       <SectionHeader
         title="Buscar"
-        subtitle="Encontre filmes e series e veja rapidamente onde estao disponiveis."
+        subtitle="Encontre filmes e séries e veja rapidamente onde estão disponíveis."
       />
 
       <View style={styles.searchBar}>
         <Ionicons name="search" size={18} color={theme.colors.textSoft} />
         <TextInput
-          placeholder="Busque por titulo, genero ou clima"
+          placeholder="Busque por título, gênero ou clima"
           placeholderTextColor={theme.colors.textSoft}
           style={styles.searchInput}
           value={query}
@@ -70,7 +70,7 @@ export default function SearchScreen() {
       </View>
 
       <View style={styles.section}>
-        <AppText style={styles.label}>Generos populares</AppText>
+        <AppText style={styles.label}>Gêneros populares</AppText>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
           {genres.map((genre, index) => (
             <Chip key={genre} label={genre} active={index === 1} />
@@ -79,7 +79,7 @@ export default function SearchScreen() {
       </View>
 
       {!trimmedQuery && (
-        <AppText style={styles.feedback}>Digite um titulo para buscar no catalogo.</AppText>
+        <AppText style={styles.feedback}>Digite um título para buscar no catálogo.</AppText>
       )}
       {isLoading && <AppText style={styles.feedback}>Buscando...</AppText>}
       {error && <AppText style={styles.feedback}>{error}</AppText>}

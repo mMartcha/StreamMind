@@ -41,8 +41,8 @@ export default function StreamingsScreen() {
           </View>
 
           <SectionHeader
-            title="Selecione seus servicos"
-            subtitle="Use esse picker simples para marcar as plataformas que voce assina hoje."
+            title="Selecione seus serviços"
+            subtitle="Use esse picker simples para marcar as plataformas que você assina hoje."
           />
 
           <View style={styles.pickerContent}>
@@ -59,7 +59,7 @@ export default function StreamingsScreen() {
                   <View style={styles.optionTextWrap}>
                     <AppText style={styles.optionTitle}>{platform}</AppText>
                     <AppText style={styles.optionCaption}>
-                      {selected ? 'Selecionado para suas recomendacoes.' : 'Toque para adicionar ao seu perfil.'}
+                      {selected ? 'Selecionado para suas recomendações.' : 'Toque para adicionar ao seu perfil.'}
                     </AppText>
                   </View>
                   <View style={[styles.checkBadge, selected && styles.checkBadgeSelected]}>

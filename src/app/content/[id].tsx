@@ -86,7 +86,7 @@ export default function ContentDetailsScreen() {
 
     async function loadDetails() {
       if (!routeInfo) {
-        setError("Conteudo nao encontrado.");
+        setError("Conteúdo não encontrado.");
         setIsLoading(false);
         return;
       }
@@ -128,7 +128,7 @@ export default function ContentDetailsScreen() {
         );
       } catch {
         if (isMounted) {
-          setError("Nao foi possivel carregar os detalhes agora.");
+          setError("Não foi possível carregar os detalhes agora.");
         }
       } finally {
         if (isMounted) {
@@ -239,7 +239,7 @@ export default function ContentDetailsScreen() {
 
       setUserListState((current) => ({ ...current, [status]: createdItem }));
     } catch {
-      setError("Nao foi possivel atualizar sua lista agora.");
+      setError("Não foi possível atualizar sua lista agora.");
     } finally {
       setPendingStatus(null);
     }
@@ -342,7 +342,7 @@ export default function ContentDetailsScreen() {
               <View style={styles.block}>
                 <SectionHeader
                   title="Sinopse"
-                  subtitle="Resumo oficial carregado pelo catalogo."
+                  subtitle="Resumo oficial carregado pelo catálogo."
                 />
                 <AppText style={styles.paragraph}>{item.aiSynopsis}</AppText>
               </View>
@@ -350,13 +350,13 @@ export default function ContentDetailsScreen() {
               <View style={styles.block}>
                 <SectionHeader
                   title="Disponivel em"
-                  subtitle="A tela de detalhes funciona como ponte para os servicos externos."
+                  subtitle="A tela de detalhes funciona como ponte para os serviços externos."
                 />
                 {flatrateProviders.length > 0 ? (
                   <ProviderRow providers={flatrateProviders} />
                 ) : (
                   <AppText style={styles.paragraph}>
-                    Nao disponivel por assinatura no Brasil.
+                    Não disponível por assinatura no Brasil.
                   </AppText>
                 )}
               </View>

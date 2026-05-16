@@ -51,7 +51,7 @@ export default function ProfileScreen() {
           if (isActive) {
             setStats(emptyStats);
             setWatchLater([]);
-            setError('Nao foi possivel carregar os dados do perfil agora.');
+            setError('Não foi possível carregar os dados do perfil agora.');
           }
         } finally {
           if (isActive) {
@@ -84,7 +84,7 @@ export default function ProfileScreen() {
     <Screen>
       <SectionHeader
         title="Perfil"
-        subtitle="Preferencias, historico e atalhos para escolher mais rapido no dia a dia."
+        subtitle="Preferências, histórico e atalhos para escolher mais rápido no dia a dia."
       />
 
       <View style={styles.hero}>
@@ -101,7 +101,7 @@ export default function ProfileScreen() {
         <View style={styles.streamingButtonTextWrap}>
           <AppText style={styles.streamingButtonTitle}>Meus streamings</AppText>
           <AppText style={styles.streamingButtonCaption}>
-            Escolha os servicos que voce assina para personalizar as sugestoes.
+            Escolha os serviços que você assina para personalizar as sugestões.
           </AppText>
         </View>
         <Ionicons name="chevron-forward" size={20} color={theme.colors.primarySoft} />
@@ -122,9 +122,9 @@ export default function ProfileScreen() {
       {error && <AppText style={styles.feedback}>{error}</AppText>}
 
       <View style={styles.section}>
-        <AppText style={styles.label}>Preferencias de genero</AppText>
+        <AppText style={styles.label}>Preferências de gênero</AppText>
         <View style={styles.tagRow}>
-          {['Ficcao Cientifica', 'Suspense', 'Drama', 'Familia'].map((genre) => (
+          {['Ficção Científica', 'Suspense', 'Drama', 'Família'].map((genre) => (
             <Chip key={genre} label={genre} active />
           ))}
         </View>
@@ -133,7 +133,7 @@ export default function ProfileScreen() {
       <View style={styles.section}>
         <AppText style={styles.label}>Assistir depois</AppText>
         {!isLoading && !error && watchLater.length === 0 && (
-          <AppText style={styles.feedback}>Nenhum titulo salvo para depois.</AppText>
+          <AppText style={styles.feedback}>Nenhum título salvo para depois.</AppText>
         )}
         <View style={styles.list}>
           {watchLater.map((item) => (

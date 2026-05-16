@@ -22,7 +22,7 @@ export default function RegisterScreen() {
       await signUp(name.trim(), email.trim(), password);
       router.replace('/(tabs)');
     } catch {
-      setError('Nao foi possivel criar sua conta.');
+      setError('Não foi possível criar sua conta.');
     } finally {
       setIsSubmitting(false);
     }
@@ -34,7 +34,7 @@ export default function RegisterScreen() {
         <AppText style={styles.brand}>
           Stream<AppText style={styles.innerBrand}>Mind</AppText>
         </AppText>
-        <AppText style={styles.subtitle}>Crie sua conta para salvar favoritos e historico.</AppText>
+        <AppText style={styles.subtitle}>Crie sua conta para salvar favoritos e histórico.</AppText>
       </View>
 
       <View style={styles.form}>

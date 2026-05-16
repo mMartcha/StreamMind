@@ -6,7 +6,6 @@ import { theme } from '@/theme';
 const iconByRoute: Record<string, keyof typeof Ionicons.glyphMap> = {
   index: 'home',
   buscar: 'search',
-  ia: 'sparkles',
   favoritos: 'heart',
   perfil: 'person',
 };
@@ -32,27 +31,12 @@ export default function TabsLayout() {
         tabBarInactiveTintColor: theme.colors.textSoft,
         tabBarIcon: ({ color, focused, size }) => {
           const name = iconByRoute[route.name] ?? 'ellipse';
-          return (
-            <Ionicons
-              name={name}
-              color={color}
-              size={route.name === 'ia' ? size + 4 : size}
-              style={
-                route.name === 'ia' && focused
-                  ? {
-                      textShadowColor: '#8A2BE2AA',
-                      textShadowOffset: { width: 0, height: 0 },
-                      textShadowRadius: 12,
-                    }
-                  : undefined
-              }
-            />
-          );
+          return <Ionicons name={name} color={color} size={size} />;
         },
       })}>
       <Tabs.Screen name="index" options={{ title: 'Inicio' }} />
       <Tabs.Screen name="buscar" options={{ title: 'Buscar' }} />
-      <Tabs.Screen name="ia" options={{ title: 'AI' }} />
+      <Tabs.Screen name="ia" options={{ href: null }} />
       <Tabs.Screen name="favoritos" options={{ title: 'Favoritos' }} />
       <Tabs.Screen name="perfil" options={{ title: 'Perfil' }} />
     </Tabs>

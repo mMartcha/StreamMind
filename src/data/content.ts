@@ -61,7 +61,7 @@ export const contentLibrary: ContentItem[] = [
     title: 'Duna: Parte Dois',
     year: 2024,
     duration: '2h 46min',
-    genre: ['Ficcao Cientifica', 'Aventura'],
+    genre: ['Ficção Científica', 'Aventura'],
     imdb: 8.5,
     type: 'Filme',
     poster:
@@ -71,7 +71,7 @@ export const contentLibrary: ContentItem[] = [
     shortSynopsis:
       'Paul Atreides assume um destino maior enquanto guerra e profecia se chocam em Arrakis.',
     aiSynopsis:
-      'Uma jornada grandiosa sobre escolhas, poder e legado. Ideal para quem curte mundos densos, visual cinematografico forte e tensao politica constante.',
+      'Uma jornada grandiosa sobre escolhas, poder e legado. Ideal para quem curte mundos densos, visual cinematográfico forte e tensão política constante.',
     cast: ['Timothee Chalamet', 'Zendaya', 'Rebecca Ferguson'],
     availableOn: ['Max', 'Prime Video'],
     trending: true,
@@ -92,9 +92,9 @@ export const contentLibrary: ContentItem[] = [
     backdrop:
       'https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?auto=format&fit=crop&w=1400&q=80',
     shortSynopsis:
-      'Funcionarios dividem memoria pessoal e profissional em um experimento corporativo perturbador.',
+      'Funcionários dividem memória pessoal e profissional em um experimento corporativo perturbador.',
     aiSynopsis:
-      'Curadoria para quem gosta de misterio elegante, critica social e narrativas que deixam perguntas no ar a cada episodio.',
+      'Curadoria para quem gosta de mistério elegante, crítica social e narrativas que deixam perguntas no ar a cada episódio.',
     cast: ['Adam Scott', 'Britt Lower', 'Patricia Arquette'],
     availableOn: ['Apple TV+'],
     recommended: true,
@@ -106,7 +106,7 @@ export const contentLibrary: ContentItem[] = [
     title: 'Divertida Mente 2',
     year: 2024,
     duration: '1h 36min',
-    genre: ['Animacao', 'Familia'],
+    genre: ['Animação', 'Família'],
     imdb: 7.8,
     type: 'Filme',
     poster:
@@ -114,9 +114,9 @@ export const contentLibrary: ContentItem[] = [
     backdrop:
       'https://images.unsplash.com/photo-1518929458119-e5bf444c30f4?auto=format&fit=crop&w=1400&q=80',
     shortSynopsis:
-      'Novas emocoes chegam para baguncar a central de comando de Riley na adolescencia.',
+      'Novas emoções chegam para baguncar a central de comando de Riley na adolescencia.',
     aiSynopsis:
-      'Recomendacao calorosa para ver em familia, com humor acessivel e uma camada emocional que conversa bem com varias idades.',
+      'Recomendação calorosa para ver em família, com humor acessível e uma camada emocional que conversa bem com várias idades.',
     cast: ['Amy Poehler', 'Maya Hawke', 'Kensington Tallman'],
     availableOn: ['Disney+'],
     trending: true,
@@ -127,7 +127,7 @@ export const contentLibrary: ContentItem[] = [
     title: 'Fallout',
     year: 2024,
     duration: '1 temporada',
-    genre: ['Acao', 'Ficcao Cientifica'],
+    genre: ['Ação', 'Ficção Científica'],
     imdb: 8.3,
     type: 'Serie',
     poster:
@@ -137,7 +137,7 @@ export const contentLibrary: ContentItem[] = [
     shortSynopsis:
       'Sobreviventes deixam bunkers subterraneos e encaram um mundo devastado e absurdo.',
     aiSynopsis:
-      'Boa pedida para quem quer ritmo alto, humor sombrio e universo pos-apocaliptico com identidade forte.',
+      'Boa pedida para quem quer ritmo alto, humor sombrio e universo pós-apocalíptico com identidade forte.',
     cast: ['Ella Purnell', 'Aaron Moten', 'Walton Goggins'],
     availableOn: ['Prime Video'],
     trending: true,
@@ -149,7 +149,7 @@ export const contentLibrary: ContentItem[] = [
     title: 'O Urso',
     year: 2023,
     duration: '3 temporadas',
-    genre: ['Drama', 'Comedia'],
+    genre: ['Drama', 'Comédia'],
     imdb: 8.6,
     type: 'Serie',
     poster:
@@ -157,9 +157,9 @@ export const contentLibrary: ContentItem[] = [
     backdrop:
       'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1400&q=80',
     shortSynopsis:
-      'Um chef premiado tenta salvar o restaurante da familia enquanto lida com luto e pressao.',
+      'Um chef premiado tenta salvar o restaurante da família enquanto lida com luto e pressão.',
     aiSynopsis:
-      'Para momentos em que voce quer algo intenso e humano, com dialogos afiados e energia quase caotica.',
+      'Para momentos em que você quer algo intenso e humano, com diálogos afiados e energia quase caótica.',
     cast: ['Jeremy Allen White', 'Ayo Edebiri', 'Ebon Moss-Bachrach'],
     availableOn: ['Disney+'],
     recommended: true,
@@ -170,7 +170,7 @@ export const contentLibrary: ContentItem[] = [
     title: 'Round 6',
     year: 2021,
     duration: '2 temporadas',
-    genre: ['Suspense', 'Acao'],
+    genre: ['Suspense', 'Ação'],
     imdb: 8,
     type: 'Serie',
     poster:
@@ -180,7 +180,7 @@ export const contentLibrary: ContentItem[] = [
     shortSynopsis:
       'Competidores endividados entram em jogos mortais em busca de um premio transformador.',
     aiSynopsis:
-      'Sugestao para maratonar quando voce busca alta tensao, critica social direta e episodios que prendem muito.',
+      'Sugestão para maratonar quando você busca alta tensão, crítica social direta e episódios que prendem muito.',
     cast: ['Lee Jung-jae', 'Wi Ha-jun', 'Lee Byung-hun'],
     availableOn: ['Netflix'],
     trending: true,
@@ -190,12 +190,12 @@ export const contentLibrary: ContentItem[] = [
 ];
 
 export const genres = [
-  'Acao',
-  'Animacao',
-  'Comedia',
+  'Ação',
+  'Animação',
+  'Comédia',
   'Drama',
-  'Familia',
-  'Ficcao Cientifica',
+  'Família',
+  'Ficção Científica',
   'Romance',
   'Suspense',
 ];
@@ -204,7 +204,7 @@ export const aiConversation = [
   {
     id: 'u1',
     role: 'user' as const,
-    text: 'Quero algo para ver em familia hoje a noite.',
+    text: 'Quero algo para ver em família hoje à noite.',
   },
   {
     id: 'a1',
@@ -215,12 +215,12 @@ export const aiConversation = [
   {
     id: 'u2',
     role: 'user' as const,
-    text: 'E se eu quiser uma serie mais intensa para depois?',
+    text: 'E se eu quiser uma série mais intensa para depois?',
   },
   {
     id: 'a2',
     role: 'assistant' as const,
-    text: 'Nesse clima, voce pode ir de suspense psicologico ou distopia com mais adrenalina.',
+    text: 'Nesse clima, você pode ir de suspense psicológico ou distopia com mais adrenalina.',
     picks: ['ruptura', 'fallout'],
   },
 ];
