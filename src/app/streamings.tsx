@@ -1,26 +1,20 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Stack, useRouter } from 'expo-router';
-import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { AppText, Screen, SectionHeader } from '@/src/components';
-import { platformMeta, PlatformKey } from '@/src/data/content';
+import { platformMeta } from '@/src/data/content';
+import {
+  toggleSubscribedUserStreaming,
+  useSubscribedUserStreamings,
+  userStreamingOptions,
+} from '@/src/services/user-streamings.mock';
 import { theme } from '@/theme';
-
-const streamingOptions = Object.keys(platformMeta) as PlatformKey[];
-const initialSelection: PlatformKey[] = ['Netflix', 'Prime Video'];
 
 export default function StreamingsScreen() {
   const router = useRouter();
-  const [selectedPlatforms, setSelectedPlatforms] = useState<PlatformKey[]>(initialSelection);
-
-  function togglePlatform(platform: PlatformKey) {
-    setSelectedPlatforms((current) =>
-      current.includes(platform)
-        ? current.filter((item) => item !== platform)
-        : [...current, platform]
-    );
-  }
+  const selectedStreamings = useSubscribedUserStreamings();
+  const selectedProviderIds = new Set(selectedStreamings.map((provider) => provider.providerId));
 
   return (
     <>
@@ -46,18 +40,18 @@ export default function StreamingsScreen() {
           />
 
           <View style={styles.pickerContent}>
-            {streamingOptions.map((platform) => {
-              const selected = selectedPlatforms.includes(platform);
-              const meta = platformMeta[platform];
+            {userStreamingOptions.map((provider) => {
+              const selected = selectedProviderIds.has(provider.providerId);
+              const meta = platformMeta[provider.platformKey];
 
               return (
                 <Pressable
-                  key={platform}
-                  onPress={() => togglePlatform(platform)}
+                  key={provider.providerId}
+                  onPress={() => toggleSubscribedUserStreaming(provider.providerId)}
                   style={[styles.optionRow, selected && styles.optionRowSelected]}>
                   <View style={[styles.optionDot, { backgroundColor: meta.color }]} />
                   <View style={styles.optionTextWrap}>
-                    <AppText style={styles.optionTitle}>{platform}</AppText>
+                    <AppText style={styles.optionTitle}>{provider.providerName}</AppText>
                     <AppText style={styles.optionCaption}>
                       {selected ? 'Selecionado para suas recomendações.' : 'Toque para adicionar ao seu perfil.'}
                     </AppText>
@@ -77,8 +71,8 @@ export default function StreamingsScreen() {
           <View style={styles.footerCard}>
             <AppText style={styles.footerTitle}>Selecionados</AppText>
             <AppText style={styles.footerText}>
-              {selectedPlatforms.length > 0
-                ? selectedPlatforms.join(', ')
+              {selectedStreamings.length > 0
+                ? selectedStreamings.map((provider) => provider.providerName).join(', ')
                 : 'Nenhum streaming selecionado ainda.'}
             </AppText>
           </View>
@@ -143,7 +137,7 @@ const styles = StyleSheet.create({
   },
   optionRowSelected: {
     backgroundColor: '#1b1422',
-    borderColor: '#8A2BE255',
+    borderColor: theme.colors.primary,
   },
   optionDot: {
     width: 14,

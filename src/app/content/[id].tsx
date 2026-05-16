@@ -26,6 +26,10 @@ import {
   toContentItem,
   toUserTitleMediaType,
 } from "@/src/services/api";
+import {
+  UserStreamingProvider,
+  useSubscribedUserStreamings,
+} from "@/src/services/user-streamings.mock";
 import { theme } from "@/theme";
 
 const userListActions: {
@@ -59,6 +63,9 @@ const userListActions: {
 ];
 
 type UserListState = Record<UserTitleStatus, UserTitleItem | null>;
+type StreamingProviderWithSubscription = StreamingProvider & {
+  isSubscribed: boolean;
+};
 
 const emptyUserListState: UserListState = {
   FAVORITE: null,
@@ -66,10 +73,78 @@ const emptyUserListState: UserListState = {
   WATCHED: null,
 };
 
+function normalizeProviderName(name: string) {
+  return name
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function isSubscribedProvider(
+  provider: StreamingProvider,
+  subscribedStreamings: UserStreamingProvider[],
+) {
+  const normalizedProviderName = normalizeProviderName(provider.name);
+
+  return subscribedStreamings.some((streaming) => {
+    if (provider.id === streaming.providerId) {
+      return true;
+    }
+
+    const normalizedStreamingName = normalizeProviderName(
+      streaming.providerName,
+    );
+
+    return (
+      normalizedProviderName === normalizedStreamingName ||
+      normalizedProviderName.includes(normalizedStreamingName) ||
+      normalizedStreamingName.includes(normalizedProviderName)
+    );
+  });
+}
+
+function withSubscriptionFlag(
+  providers: StreamingProvider[],
+  subscribedStreamings: UserStreamingProvider[],
+): StreamingProviderWithSubscription[] {
+  return providers.map((provider) => ({
+    ...provider,
+    isSubscribed: isSubscribedProvider(provider, subscribedStreamings),
+  }));
+}
+
+const contentStatusTranslations: Record<string, string> = {
+  CANCELED: "Cancelado",
+  Canceled: "Cancelado",
+  ENDED: "Encerrado",
+  Ended: "Encerrado",
+  FAVORITE: "Favorito",
+  "In Production": "Em produção",
+  "Post Production": "Pós-produção",
+  Planned: "Planejado",
+  Pilot: "Piloto",
+  Released: "Lançado",
+  "Returning Series": "Em exibição",
+  Rumored: "Rumorado",
+  WATCHED: "Assistido",
+  WATCHLIST: "Na lista",
+};
+
+function translateContentStatus(status?: string) {
+  if (!status) {
+    return undefined;
+  }
+
+  return contentStatusTranslations[status] ?? status;
+}
+
 export default function ContentDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const subscribedStreamings = useSubscribedUserStreamings();
 
   const [item, setItem] = useState<CatalogContentItem | null>(null);
   const [providers, setProviders] = useState<ProvidersResponse | null>(null);
@@ -247,7 +322,11 @@ export default function ContentDetailsScreen() {
     }
   }
 
-  const flatrateProviders = providers?.flatrate ?? [];
+  const flatrateProviders = useMemo(
+    () => withSubscriptionFlag(providers?.flatrate ?? [], subscribedStreamings),
+    [providers?.flatrate, subscribedStreamings],
+  );
+  const translatedStatus = translateContentStatus(item?.status);
 
   return (
     <>
@@ -304,7 +383,7 @@ export default function ContentDetailsScreen() {
                 <View style={styles.scoreCard}>
                   <AppText style={styles.scoreLabel}>Status</AppText>
                   <AppText style={styles.scoreValueMuted}>
-                    {item.status ?? item.duration}
+                    {translatedStatus ?? item.duration}
                   </AppText>
                 </View>
               </View>
@@ -357,7 +436,7 @@ export default function ContentDetailsScreen() {
 
               <View style={styles.block}>
                 <SectionHeader
-                  title="Disponivel em"
+                  title="Disponível em"
                   subtitle="A tela de detalhes funciona como ponte para os serviços externos."
                 />
                 {flatrateProviders.length > 0 ? (
@@ -386,11 +465,21 @@ export default function ContentDetailsScreen() {
   );
 }
 
-function ProviderRow({ providers }: { providers: StreamingProvider[] }) {
+function ProviderRow({
+  providers,
+}: {
+  providers: StreamingProviderWithSubscription[];
+}) {
   return (
     <View style={styles.castRow}>
       {providers.map((provider) => (
-        <View key={provider.id} style={styles.castChip}>
+        <View
+          key={provider.id}
+          style={[
+            styles.castChip,
+            provider.isSubscribed && styles.castChipSubscribed,
+          ]}
+        >
           {provider.logoUrl ? (
             <Image
               source={{ uri: provider.logoUrl }}
@@ -531,13 +620,13 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   castRow: {
-    flexDirection: "row",
     flexWrap: "wrap",
     gap: 10,
   },
   castChip: {
     flexDirection: "row",
     alignItems: "center",
+    flexWrap: "wrap",
     gap: 10,
     paddingHorizontal: 14,
     paddingVertical: 10,
@@ -545,6 +634,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: theme.colors.border,
     backgroundColor: theme.colors.surface,
+  },
+  castChipSubscribed: {
+    borderWidth: 2,
+    borderColor: theme.colors.primary,
   },
   castText: {
     color: theme.colors.text,
