@@ -9,7 +9,7 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  View
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -432,6 +432,13 @@ export default function AIScreen() {
         >
           <View style={styles.streamMateHero}>
             <View style={styles.heroTopRow}>
+              <Pressable onPress={goBack} style={styles.backButton}>
+                <Ionicons
+                  name="arrow-back"
+                  size={18}
+                  color={theme.colors.text}
+                />
+              </Pressable>
               <View style={styles.aiBadge}>
                 <Ionicons
                   name="sparkles"
@@ -442,13 +449,6 @@ export default function AIScreen() {
                   Recomendações interativas
                 </AppText>
               </View>
-              <Pressable onPress={goBack} style={styles.backButton}>
-                <Ionicons
-                  name="arrow-back"
-                  size={18}
-                  color={theme.colors.text}
-                />
-              </Pressable>
             </View>
 
             <View style={styles.heroIconWrap}>

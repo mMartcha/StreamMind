@@ -10,10 +10,7 @@ import {
   Screen,
   SectionHeader,
 } from "@/src/components";
-import {
-  CatalogContentItem,
-  toContentItem,
-} from "@/src/services/api";
+import { CatalogContentItem, toContentItem } from "@/src/services/api";
 import { getTrending } from "@/src/services/catalog.service";
 import { theme } from "@/theme";
 
@@ -22,7 +19,6 @@ export default function HomeScreen() {
   const [items, setItems] = useState<CatalogContentItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
 
   useEffect(() => {
     let isMounted = true;
