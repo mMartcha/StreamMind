@@ -19,6 +19,10 @@ import {
   toCatalogMediaType,
   type UserTitleItem,
 } from "@/src/services/api";
+import {
+  generateRecommendations,
+  type RecommendationItem,
+} from "@/src/services/recommendations.service";
 import { theme } from "@/theme";
 
 type WatchedMovie = {
@@ -27,15 +31,6 @@ type WatchedMovie = {
   title: string;
   posterUrl: string | null;
   genres?: string[];
-};
-
-type AiRecommendationResult = {
-  tmdbId: number;
-  mediaType: "movie" | "tv";
-  title: string;
-  posterUrl: string | null;
-  overview: string;
-  reason: string;
 };
 
 const desiredGenres = [
@@ -51,207 +46,6 @@ const desiredGenres = [
   "Documentário",
 ];
 
-const mockRecommendationsByGenre: Record<
-  string,
-  Omit<AiRecommendationResult, "reason">[]
-> = {
-  Ação: [
-    {
-      tmdbId: 603,
-      mediaType: "movie",
-      title: "Matrix",
-      posterUrl:
-        "https://image.tmdb.org/t/p/w500/qFHE09iQDbpHUBXJ8cFZu9v2ViO.jpg",
-      overview:
-        "Um programador descobre que sua realidade e uma simulação controlada por máquinas.",
-    },
-    {
-      tmdbId: 76341,
-      mediaType: "movie",
-      title: "Mad Max: Estrada da Fúria",
-      posterUrl:
-        "https://image.tmdb.org/t/p/w500/tH64gzAHDFg7EFcgfkkZyHdGM5P.jpg",
-      overview:
-        "Em um deserto pós-apocalíptico, uma fugitiva lidera uma fuga explosiva por sobrevivência.",
-    },
-    {
-      tmdbId: 245891,
-      mediaType: "movie",
-      title: "John Wick",
-      posterUrl:
-        "https://image.tmdb.org/t/p/w500/rboZslo3eQWKBQ3QvlO6wGV0J3K.jpg",
-      overview:
-        "Um ex-assassino retorna ao submundo em uma jornada brutal de vinganca.",
-    },
-  ],
-  Terror: [
-    {
-      tmdbId: 493922,
-      mediaType: "movie",
-      title: "Hereditario",
-      posterUrl:
-        "https://image.tmdb.org/t/p/w500/lHV8HHlhwNup2VbpiACtlKzaGIQ.jpg",
-      overview:
-        "Uma família em luto descobre segredos sombrios que tornam a casa cada vez mais ameaçadora.",
-    },
-    {
-      tmdbId: 419430,
-      mediaType: "movie",
-      title: "Corra!",
-      posterUrl:
-        "https://image.tmdb.org/t/p/w500/7hmmKIWDHi7jzOiGzffZesXKKfp.jpg",
-      overview:
-        "Um jovem fotógrafo descobre uma verdade perturbadora durante uma visita familiar.",
-    },
-    {
-      tmdbId: 138843,
-      mediaType: "movie",
-      title: "Invocacao do Mal",
-      posterUrl:
-        "https://image.tmdb.org/t/p/w500/1NxHKZW5DPbUFtbF3MxbdSyxRqU.jpg",
-      overview:
-        "Investigadores paranormais ajudam uma família assombrada por uma presença violenta.",
-    },
-  ],
-  Suspense: [
-    {
-      tmdbId: 807,
-      mediaType: "movie",
-      title: "Seven",
-      posterUrl:
-        "https://image.tmdb.org/t/p/w500/6yoghtyTpznpBik8EngEmJskVUO.jpg",
-      overview:
-        "Dois detetives investigam uma série de crimes ligados aos sete pecados capitais.",
-    },
-    {
-      tmdbId: 11324,
-      mediaType: "movie",
-      title: "Ilha do Medo",
-      posterUrl:
-        "https://image.tmdb.org/t/p/w500/qnWJFFkRv61e030YcOBVI9U4o6V.jpg",
-      overview:
-        "Um agente federal investiga um desaparecimento em um hospital psiquiátrico isolado.",
-    },
-    {
-      tmdbId: 210577,
-      mediaType: "movie",
-      title: "Garota Exemplar",
-      posterUrl:
-        "https://image.tmdb.org/t/p/w500/9i1ks1VxXl19A9RZCVu14xemI1P.jpg",
-      overview:
-        "O desaparecimento de uma mulher transforma seu marido no centro de uma trama ambígua.",
-    },
-  ],
-  "Ficção cientifica": [
-    {
-      tmdbId: 157336,
-      mediaType: "movie",
-      title: "Interestelar",
-      posterUrl:
-        "https://image.tmdb.org/t/p/w500/nCbkOyOMTEwlEV0LtCOvCnwEONA.jpg",
-      overview:
-        "Exploradores cruzam o espaco em busca de um novo lar para a humanidade.",
-    },
-    {
-      tmdbId: 335984,
-      mediaType: "movie",
-      title: "Blade Runner 2049",
-      posterUrl:
-        "https://image.tmdb.org/t/p/w500/gajva2L0rPYkEWjzgFlBXCAVBE5.jpg",
-      overview:
-        "Um novo blade runner descobre um segredo capaz de abalar a ordem da sociedade.",
-    },
-    {
-      tmdbId: 329865,
-      mediaType: "movie",
-      title: "A Chegada",
-      posterUrl:
-        "https://image.tmdb.org/t/p/w500/4Iu5f2nv7huqvuYkmZvSPOtbFjs.jpg",
-      overview:
-        "Uma linguista tenta decifrar a comunicação de visitantes extraterrestres misteriosos.",
-    },
-  ],
-  Drama: [
-    {
-      tmdbId: 550,
-      mediaType: "movie",
-      title: "Clube da Luta",
-      posterUrl:
-        "https://image.tmdb.org/t/p/w500/mCICnh7QBH0gzYaTQChBDDVIKdm.jpg",
-      overview:
-        "Um homem insone se envolve com um estranho vendedor e um clube clandestino.",
-    },
-    {
-      tmdbId: 244786,
-      mediaType: "movie",
-      title: "Whiplash",
-      posterUrl:
-        "https://image.tmdb.org/t/p/w500/7fn624j5lj3xTme2SgiLCeuedmO.jpg",
-      overview:
-        "Um jovem baterista enfrenta um professor implacável em busca da excelência.",
-    },
-    {
-      tmdbId: 106646,
-      mediaType: "movie",
-      title: "O Lobo de Wall Street",
-      posterUrl:
-        "https://image.tmdb.org/t/p/w500/esJTXTdj4rl9dJnDijTqY8E4w4T.jpg",
-      overview:
-        "A ascensão e queda de um corretor marcado por ambição, excessos e fraudes.",
-    },
-  ],
-  Comédia: [
-    {
-      tmdbId: 8363,
-      mediaType: "movie",
-      title: "Superbad",
-      posterUrl:
-        "https://image.tmdb.org/t/p/w500/ek8e8txUyUwd2BNqj6lFEerJfbq.jpg",
-      overview:
-        "Dois amigos tentam transformar uma festa em uma despedida memoravel do ensino medio.",
-    },
-    {
-      tmdbId: 12153,
-      mediaType: "movie",
-      title: "As Branquelas",
-      posterUrl:
-        "https://image.tmdb.org/t/p/w500/aJZOcorpgloDLkPP6ED0t9sXjNu.jpg",
-      overview:
-        "Dois agentes do FBI entram em uma missão absurda envolvendo disfarces improváveis.",
-    },
-    {
-      tmdbId: 38365,
-      mediaType: "movie",
-      title: "Gente Grande",
-      posterUrl:
-        "https://image.tmdb.org/t/p/w500/cQGM5k1NtU85n4TUlrOrwijSCcm.jpg",
-      overview:
-        "Amigos de infância se reencontram para um fim de semana cheio de confusões.",
-    },
-  ],
-};
-
-const fallbackRecommendations = Object.values(
-  mockRecommendationsByGenre,
-).flat();
-
-const genreTraits: Record<string, string[]> = {
-  Ação: ["ritmo acelerado", "conflitos diretos", "energia visual"],
-  Aventura: ["descoberta", "jornada", "escala emocional"],
-  Comédia: ["humor leve", "situações absurdas", "elenco carismático"],
-  Drama: ["personagens em conflito", "tensão emocional", "decisões difíceis"],
-  "Ficção cientifica": [
-    "ideias provocativas",
-    "atmosfera futurista",
-    "mistério conceitual",
-  ],
-  Terror: ["atmosfera sombria", "tensão crescente", "desconforto psicológico"],
-  Suspense: ["ritmo psicológico", "ambiguidade", "viradas de roteiro"],
-  Romance: ["conexão emocional", "intimidade", "conflitos afetivos"],
-  Animação: ["imaginação visual", "aventura acessível", "leveza emocional"],
-  Documentário: ["curiosidade", "contexto real", "descoberta"],
-};
-
 function toWatchedMovie(item: UserTitleItem): WatchedMovie {
   return {
     tmdbId: item.tmdbId,
@@ -262,47 +56,9 @@ function toWatchedMovie(item: UserTitleItem): WatchedMovie {
 }
 
 function getMediaKey(
-  item: Pick<AiRecommendationResult | WatchedMovie, "mediaType" | "tmdbId">,
+  item: Pick<RecommendationItem | WatchedMovie, "mediaType" | "tmdbId">,
 ) {
   return `${item.mediaType}-${item.tmdbId}`;
-}
-
-function buildRecommendationReason(
-  recommendation: Omit<AiRecommendationResult, "reason">,
-  selectedMovies: WatchedMovie[],
-  desiredGenre: string,
-  index: number,
-) {
-  const selectedTitles = selectedMovies.map((movie) => movie.title).join(" e ");
-  const traits = genreTraits[desiredGenre] ?? genreTraits.Ação;
-  const trait = traits[index % traits.length];
-
-  return `Com base em ${selectedTitles} e no gênero ${desiredGenre}, a IA identificou uma preferência por ${trait}, tom consistente e personagens com objetivos bem definidos. Por isso, ${recommendation.title} combina com o tipo de experiência que você demonstrou gostar.`;
-}
-
-function createMockRecommendations(
-  selectedMovies: WatchedMovie[],
-  desiredGenre: string,
-): AiRecommendationResult[] {
-  const selectedKeys = new Set(selectedMovies.map(getMediaKey));
-  const preferredOptions = mockRecommendationsByGenre[desiredGenre] ?? [];
-  const candidates = [...preferredOptions, ...fallbackRecommendations].filter(
-    (recommendation, index, list) =>
-      !selectedKeys.has(getMediaKey(recommendation)) &&
-      list.findIndex(
-        (item) => getMediaKey(item) === getMediaKey(recommendation),
-      ) === index,
-  );
-
-  return candidates.slice(0, 2).map((recommendation, index) => ({
-    ...recommendation,
-    reason: buildRecommendationReason(
-      recommendation,
-      selectedMovies,
-      desiredGenre,
-      index,
-    ),
-  }));
 }
 
 export default function AIScreen() {
@@ -315,9 +71,12 @@ export default function AIScreen() {
   const [selectedMovieKeys, setSelectedMovieKeys] = useState<string[]>([]);
   const [desiredGenre, setDesiredGenre] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [recommendations, setRecommendations] = useState<
-    AiRecommendationResult[]
-  >([]);
+  const [recommendations, setRecommendations] = useState<RecommendationItem[]>(
+    [],
+  );
+  const [recommendationError, setRecommendationError] = useState<string | null>(
+    null,
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -366,6 +125,7 @@ export default function AIScreen() {
     selectedMovies.length > 0 && Boolean(desiredGenre) && !isGenerating;
 
   function openRecommendationModal() {
+    setRecommendationError(null);
     setIsModalVisible(true);
   }
 
@@ -392,22 +152,38 @@ export default function AIScreen() {
   }
 
   async function generateRecommendation() {
-    if (!canGenerate || !desiredGenre) {
+    if (selectedMovies.length < 1 || selectedMovies.length > 2 || !desiredGenre) {
+      setRecommendationError(
+        "Selecione 1 ou 2 filmes e um gênero para continuar.",
+      );
       return;
     }
 
     setIsGenerating(true);
+    setRecommendationError(null);
 
-    await new Promise((resolve) => {
-      setTimeout(resolve, 900);
-    });
+    try {
+      const result = await generateRecommendations({
+        selectedMovies: selectedMovies.map((movie) => ({
+          tmdbId: movie.tmdbId,
+          mediaType: movie.mediaType,
+          title: movie.title,
+        })),
+        desiredGenre,
+      });
 
-    setRecommendations(createMockRecommendations(selectedMovies, desiredGenre));
-    setIsGenerating(false);
-    setIsModalVisible(false);
+      setRecommendations(result.recommendations.slice(0, 2));
+      setIsModalVisible(false);
+    } catch {
+      setRecommendationError(
+        "Não foi possível gerar recomendações agora. Tente novamente.",
+      );
+    } finally {
+      setIsGenerating(false);
+    }
   }
 
-  function openRecommendedDetails(recommendation: AiRecommendationResult) {
+  function openRecommendedDetails(recommendation: RecommendationItem) {
     router.push(
       `/content/${recommendation.mediaType}-${recommendation.tmdbId}`,
     );
@@ -506,14 +282,15 @@ export default function AIScreen() {
 
               <AppText style={styles.resultText}>
                 Com base nos filmes escolhidos e no gênero selecionado, a IA
-                simulou duas sugestões com perfis complementares.
+                encontrou sugestões reais do catálogo para você assistir.
               </AppText>
 
               <View style={styles.recommendationList}>
                 {recommendations.map((recommendation) => (
-                  <View
+                  <Pressable
                     key={getMediaKey(recommendation)}
                     style={styles.recommendedMovie}
+                    onPress={() => openRecommendedDetails(recommendation)}
                   >
                     {recommendation.posterUrl ? (
                       <Image
@@ -535,16 +312,19 @@ export default function AIScreen() {
                       <AppText style={styles.recommendedTitle}>
                         {recommendation.title}
                       </AppText>
+                      {recommendation.voteAverage !== null && (
+                        <AppText style={styles.recommendedMeta}>
+                          TMDB {recommendation.voteAverage.toFixed(1)}
+                        </AppText>
+                      )}
                       <AppText style={styles.recommendedOverview}>
-                        {recommendation.overview}
+                        {recommendation.overview ||
+                          "Sinopse indisponível no momento."}
                       </AppText>
                       <AppText style={styles.recommendedReason}>
                         {recommendation.reason}
                       </AppText>
-                      <Pressable
-                        style={styles.detailsButton}
-                        onPress={() => openRecommendedDetails(recommendation)}
-                      >
+                      <View style={styles.detailsButton}>
                         <AppText style={styles.detailsButtonText}>
                           Ver detalhes
                         </AppText>
@@ -553,9 +333,9 @@ export default function AIScreen() {
                           size={16}
                           color={theme.colors.primarySoft}
                         />
-                      </Pressable>
+                      </View>
                     </View>
-                  </View>
+                  </Pressable>
                 ))}
               </View>
             </View>
@@ -687,6 +467,12 @@ export default function AIScreen() {
                     );
                   })}
                 </View>
+              )}
+
+              {recommendationError && (
+                <AppText style={styles.errorFeedback}>
+                  {recommendationError}
+                </AppText>
               )}
 
               <View style={styles.genreBlock}>
@@ -934,6 +720,11 @@ const styles = StyleSheet.create({
     fontSize: theme.fonts.md,
     fontFamily: theme.fonts.family.bold,
   },
+  recommendedMeta: {
+    color: theme.colors.imdb,
+    fontSize: theme.fonts.sm,
+    fontFamily: theme.fonts.family.semibold,
+  },
   recommendedOverview: {
     color: theme.colors.textMuted,
     fontSize: theme.fonts.sm,
@@ -1062,6 +853,11 @@ const styles = StyleSheet.create({
     color: theme.colors.textMuted,
     fontSize: theme.fonts.md,
     lineHeight: 22,
+  },
+  errorFeedback: {
+    color: theme.colors.danger,
+    fontSize: theme.fonts.sm,
+    lineHeight: 20,
   },
   movieGrid: {
     flexDirection: "row",
