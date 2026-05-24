@@ -22,6 +22,7 @@ import {
 import {
   generateRecommendations,
   type RecommendationItem,
+  type RecommendationMediaType,
 } from "@/src/services/recommendations.service";
 import { theme } from "@/theme";
 
@@ -44,6 +45,14 @@ const desiredGenres = [
   "Romance",
   "Animação",
   "Documentário",
+];
+
+const desiredMediaTypes: {
+  label: string;
+  value: RecommendationMediaType;
+}[] = [
+  { label: "Filme", value: "movie" },
+  { label: "Série", value: "tv" },
 ];
 
 function toWatchedMovie(item: UserTitleItem): WatchedMovie {
@@ -70,6 +79,8 @@ export default function AIScreen() {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedMovieKeys, setSelectedMovieKeys] = useState<string[]>([]);
   const [desiredGenre, setDesiredGenre] = useState<string | null>(null);
+  const [desiredMediaType, setDesiredMediaType] =
+    useState<RecommendationMediaType | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [recommendations, setRecommendations] = useState<RecommendationItem[]>(
     [],
@@ -95,7 +106,7 @@ export default function AIScreen() {
           if (isActive) {
             setWatchedMovies([]);
             setWatchedError(
-              "Não foi possível carregar seus filmes assistidos agora.",
+              "Não foi possível carregar seus títulos assistidos agora.",
             );
           }
         } finally {
@@ -122,7 +133,10 @@ export default function AIScreen() {
   );
 
   const canGenerate =
-    selectedMovies.length > 0 && Boolean(desiredGenre) && !isGenerating;
+    selectedMovies.length > 0 &&
+    Boolean(desiredGenre) &&
+    Boolean(desiredMediaType) &&
+    !isGenerating;
 
   function openRecommendationModal() {
     setRecommendationError(null);
@@ -152,9 +166,14 @@ export default function AIScreen() {
   }
 
   async function generateRecommendation() {
-    if (selectedMovies.length < 1 || selectedMovies.length > 2 || !desiredGenre) {
+    if (
+      selectedMovies.length < 1 ||
+      selectedMovies.length > 2 ||
+      !desiredGenre ||
+      !desiredMediaType
+    ) {
       setRecommendationError(
-        "Selecione 1 ou 2 filmes e um gênero para continuar.",
+        "Selecione 1 ou 2 títulos, um gênero e o tipo de conteúdo para continuar.",
       );
       return;
     }
@@ -170,9 +189,17 @@ export default function AIScreen() {
           title: movie.title,
         })),
         desiredGenre,
+        desiredMediaType,
       });
 
-      setRecommendations(result.recommendations.slice(0, 2));
+      setRecommendations(
+        result.recommendations
+          .filter(
+            (recommendation) =>
+              recommendation.mediaType === desiredMediaType,
+          )
+          .slice(0, 2),
+      );
       setIsModalVisible(false);
     } catch {
       setRecommendationError(
@@ -281,7 +308,7 @@ export default function AIScreen() {
               </View>
 
               <AppText style={styles.resultText}>
-                Com base nos filmes escolhidos e no gênero selecionado, a IA
+                Com base nos títulos escolhidos e no gênero selecionado, a IA
                 encontrou sugestões reais do catálogo para você assistir.
               </AppText>
 
@@ -376,7 +403,7 @@ export default function AIScreen() {
             <View style={styles.modalHeader}>
               <View>
                 <AppText style={styles.modalTitle}>
-                  Escolha até 2 filmes que você já assistiu
+                  Escolha até 2 títulos que você já assistiu
                 </AppText>
                 <AppText style={styles.modalSubtitle}>
                   Selecione de 1 a 2 títulos e escolha o gênero desejado.
@@ -413,7 +440,7 @@ export default function AIScreen() {
                 !watchedError &&
                 watchedMovies.length === 0 && (
                   <AppText style={styles.feedback}>
-                    Marque filmes como assistidos para receber recomendações
+                    Marque títulos como assistidos para receber recomendações
                     personalizadas.
                   </AppText>
                 )}
@@ -497,6 +524,44 @@ export default function AIScreen() {
                           ]}
                         >
                           {genre}
+                        </AppText>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              </View>
+
+              <View style={styles.genreBlock}>
+                <AppText style={styles.genreTitle}>Quero receber</AppText>
+                <View style={styles.mediaTypeGrid}>
+                  {desiredMediaTypes.map((mediaType) => {
+                    const isSelected = desiredMediaType === mediaType.value;
+
+                    return (
+                      <Pressable
+                        key={mediaType.value}
+                        onPress={() => setDesiredMediaType(mediaType.value)}
+                        style={[
+                          styles.mediaTypeChip,
+                          isSelected && styles.mediaTypeChipSelected,
+                        ]}
+                      >
+                        <Ionicons
+                          name={
+                            mediaType.value === "movie"
+                              ? "film-outline"
+                              : "tv-outline"
+                          }
+                          size={16}
+                          color={isSelected ? "#111" : theme.colors.textMuted}
+                        />
+                        <AppText
+                          style={[
+                            styles.mediaTypeChipText,
+                            isSelected && styles.mediaTypeChipTextSelected,
+                          ]}
+                        >
+                          {mediaType.label}
                         </AppText>
                       </Pressable>
                     );
@@ -947,6 +1012,35 @@ const styles = StyleSheet.create({
     fontFamily: theme.fonts.family.semibold,
   },
   genreChipTextSelected: {
+    color: "#111",
+  },
+  mediaTypeGrid: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  mediaTypeChip: {
+    minHeight: 42,
+    flex: 1,
+    borderRadius: theme.radius.pill,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    backgroundColor: theme.colors.surface,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingHorizontal: 14,
+  },
+  mediaTypeChipSelected: {
+    backgroundColor: theme.colors.primarySoft,
+    borderColor: theme.colors.primarySoft,
+  },
+  mediaTypeChipText: {
+    color: theme.colors.text,
+    fontSize: theme.fonts.sm,
+    fontFamily: theme.fonts.family.semibold,
+  },
+  mediaTypeChipTextSelected: {
     color: "#111",
   },
   generateButton: {

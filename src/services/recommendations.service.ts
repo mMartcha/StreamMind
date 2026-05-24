@@ -11,6 +11,7 @@ export type RecommendationSelectedMovie = {
 export type GenerateRecommendationsRequest = {
   selectedMovies: RecommendationSelectedMovie[];
   desiredGenre: string;
+  desiredMediaType: RecommendationMediaType;
 };
 
 export type RecommendationItem = {
