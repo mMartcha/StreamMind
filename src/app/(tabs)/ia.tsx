@@ -70,6 +70,18 @@ function getMediaKey(
   return `${item.mediaType}-${item.tmdbId}`;
 }
 
+function truncateText(text: string | null | undefined, maxLength = 200) {
+  if (!text) {
+    return "Sinopse não disponível.";
+  }
+
+  if (text.length <= maxLength) {
+    return text;
+  }
+
+  return `${text.slice(0, maxLength).trim()}...`;
+}
+
 export default function AIScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -195,8 +207,7 @@ export default function AIScreen() {
       setRecommendations(
         result.recommendations
           .filter(
-            (recommendation) =>
-              recommendation.mediaType === desiredMediaType,
+            (recommendation) => recommendation.mediaType === desiredMediaType,
           )
           .slice(0, 2),
       );
@@ -344,9 +355,12 @@ export default function AIScreen() {
                           TMDB {recommendation.voteAverage.toFixed(1)}
                         </AppText>
                       )}
-                      <AppText style={styles.recommendedOverview}>
-                        {recommendation.overview ||
-                          "Sinopse indisponível no momento."}
+                      <AppText
+                        numberOfLines={4}
+                        ellipsizeMode="tail"
+                        style={styles.recommendedOverview}
+                      >
+                        {truncateText(recommendation.overview)}
                       </AppText>
                       <AppText style={styles.recommendedReason}>
                         {recommendation.reason}
