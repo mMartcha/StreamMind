@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { Link, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, TextInput, View } from 'react-native';
@@ -11,6 +12,7 @@ export default function LoginScreen() {
   const { signIn } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -53,14 +55,30 @@ export default function LoginScreen() {
 
         <View style={styles.field}>
           <AppText style={styles.label}>Senha</AppText>
-          <TextInput
-            onChangeText={setPassword}
-            placeholder="Sua senha"
-            placeholderTextColor={theme.colors.textSoft}
-            secureTextEntry
-            style={styles.input}
-            value={password}
-          />
+          <View style={styles.passwordInputWrap}>
+            <TextInput
+              autoCapitalize="none"
+              autoComplete="password"
+              onChangeText={setPassword}
+              placeholder="Sua senha"
+              placeholderTextColor={theme.colors.textSoft}
+              secureTextEntry={!isPasswordVisible}
+              style={[styles.input, styles.passwordInput]}
+              value={password}
+            />
+            <Pressable
+              accessibilityLabel={isPasswordVisible ? 'Ocultar senha' : 'Mostrar senha'}
+              accessibilityRole="button"
+              onPress={() => setIsPasswordVisible((current) => !current)}
+              style={styles.passwordToggle}
+            >
+              <Ionicons
+                name={isPasswordVisible ? 'eye-off-outline' : 'eye-outline'}
+                size={21}
+                color={theme.colors.textMuted}
+              />
+            </Pressable>
+          </View>
         </View>
 
         {error && <AppText style={styles.error}>{error}</AppText>}
@@ -127,6 +145,21 @@ const styles = StyleSheet.create({
     fontSize: theme.fonts.md,
     paddingHorizontal: 14,
     paddingVertical: 14,
+  },
+  passwordInputWrap: {
+    position: 'relative',
+  },
+  passwordInput: {
+    paddingRight: 50,
+  },
+  passwordToggle: {
+    position: 'absolute',
+    right: 6,
+    top: 6,
+    bottom: 6,
+    width: 42,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   button: {
     alignItems: 'center',

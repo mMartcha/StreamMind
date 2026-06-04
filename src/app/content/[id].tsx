@@ -428,14 +428,6 @@ export default function ContentDetailsScreen() {
 
               <View style={styles.block}>
                 <SectionHeader
-                  title="Sinopse"
-                  subtitle="Resumo oficial carregado pelo catálogo."
-                />
-                <AppText style={styles.paragraph}>{item.aiSynopsis}</AppText>
-              </View>
-
-              <View style={styles.block}>
-                <SectionHeader
                   title="Disponível em"
                   subtitle="A tela de detalhes funciona como ponte para os serviços externos."
                 />
@@ -446,6 +438,13 @@ export default function ContentDetailsScreen() {
                     Não disponível por assinatura no Brasil.
                   </AppText>
                 )}
+              </View>
+              <View style={styles.block}>
+                <SectionHeader
+                  title="Sinopse"
+                  subtitle="Resumo oficial carregado pelo catálogo."
+                />
+                <AppText style={styles.paragraph}>{item.aiSynopsis}</AppText>
               </View>
 
               {related.length > 0 && (

@@ -407,8 +407,9 @@ export default function AIScreen() {
         transparent
         onRequestClose={closeRecommendationModal}
       >
-        <View style={styles.modalOverlay}>
-          <View
+        <Pressable style={styles.modalOverlay} onPress={closeRecommendationModal}>
+          <Pressable
+            onPress={(event) => event.stopPropagation()}
             style={[
               styles.modalSheet,
               { paddingBottom: theme.spacing.lg + insets.bottom },
@@ -603,8 +604,8 @@ export default function AIScreen() {
                 </>
               )}
             </Pressable>
-          </View>
-        </View>
+          </Pressable>
+        </Pressable>
       </Modal>
     </Screen>
   );

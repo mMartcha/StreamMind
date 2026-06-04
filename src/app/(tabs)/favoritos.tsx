@@ -1,10 +1,14 @@
-import { useFocusEffect } from '@react-navigation/native';
-import { useCallback, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback, useState } from "react";
+import { StyleSheet, View } from "react-native";
 
-import { AppText, PosterCard, Screen, SectionHeader } from '@/src/components';
-import { CatalogContentItem, getUserLists, toContentItemFromUserList } from '@/src/services/api';
-import { theme } from '@/theme';
+import { AppText, PosterCard, Screen, SectionHeader } from "@/src/components";
+import {
+  CatalogContentItem,
+  getUserLists,
+  toContentItemFromUserList,
+} from "@/src/services/api";
+import { theme } from "@/theme";
 
 export default function FavoritesScreen() {
   const [favorites, setFavorites] = useState<CatalogContentItem[]>([]);
@@ -20,7 +24,7 @@ export default function FavoritesScreen() {
           setIsLoading(true);
           setError(null);
 
-          const data = await getUserLists('FAVORITE');
+          const data = await getUserLists("FAVORITE");
 
           if (isActive) {
             setFavorites(data.map(toContentItemFromUserList));
@@ -28,7 +32,7 @@ export default function FavoritesScreen() {
         } catch {
           if (isActive) {
             setFavorites([]);
-            setError('Não foi possível carregar seus favoritos agora.');
+            setError("Não foi possível carregar seus favoritos agora.");
           }
         } finally {
           if (isActive) {
@@ -52,14 +56,9 @@ export default function FavoritesScreen() {
         subtitle="Sua seleção pessoal, com foco rápido em disponibilidade nas plataformas."
       />
 
-      <View style={styles.summaryCard}>
-        <AppText style={styles.summaryTitle}>3 títulos salvos estão em serviços que você assina</AppText>
-        <AppText style={styles.summaryText}>
-          Prioridade hoje: continue de onde parou ou explore algo próximo do seu gosto.
-        </AppText>
-      </View>
-
-      {isLoading && <AppText style={styles.feedback}>Carregando favoritos...</AppText>}
+      {isLoading && (
+        <AppText style={styles.feedback}>Carregando favoritos...</AppText>
+      )}
       {error && <AppText style={styles.feedback}>{error}</AppText>}
       {!isLoading && !error && favorites.length === 0 && (
         <AppText style={styles.feedback}>Nenhum favorito salvo ainda.</AppText>
@@ -76,10 +75,10 @@ export default function FavoritesScreen() {
 
 const styles = StyleSheet.create({
   summaryCard: {
-    backgroundColor: '#1b1422',
+    backgroundColor: "#1b1422",
     borderRadius: theme.radius.xl,
     borderWidth: 1,
-    borderColor: '#8A2BE233',
+    borderColor: "#8A2BE233",
     padding: theme.spacing.lg,
     gap: 8,
   },
