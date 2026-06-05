@@ -1,20 +1,36 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Stack, useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { AppText, Screen, SectionHeader } from '@/src/components';
 import { platformMeta } from '@/src/data/content';
 import {
+  hydrateSubscribedUserStreamings,
   toggleSubscribedUserStreaming,
   useSubscribedUserStreamings,
   userStreamingOptions,
-} from '@/src/services/user-streamings.mock';
+} from '@/src/services/user-streamings';
 import { theme } from '@/theme';
 
 export default function StreamingsScreen() {
   const router = useRouter();
   const selectedStreamings = useSubscribedUserStreamings();
   const selectedProviderIds = new Set(selectedStreamings.map((provider) => provider.providerId));
+  const [pendingProviderId, setPendingProviderId] = useState<number | null>(null);
+
+  useEffect(() => {
+    void hydrateSubscribedUserStreamings();
+  }, []);
+
+  async function handleToggleProvider(providerId: number) {
+    try {
+      setPendingProviderId(providerId);
+      await toggleSubscribedUserStreaming(providerId);
+    } finally {
+      setPendingProviderId(null);
+    }
+  }
 
   return (
     <>
@@ -47,8 +63,13 @@ export default function StreamingsScreen() {
               return (
                 <Pressable
                   key={provider.providerId}
-                  onPress={() => toggleSubscribedUserStreaming(provider.providerId)}
-                  style={[styles.optionRow, selected && styles.optionRowSelected]}>
+                  disabled={pendingProviderId === provider.providerId}
+                  onPress={() => handleToggleProvider(provider.providerId)}
+                  style={[
+                    styles.optionRow,
+                    selected && styles.optionRowSelected,
+                    pendingProviderId === provider.providerId && styles.optionRowPending,
+                  ]}>
                   <View style={[styles.optionDot, { backgroundColor: meta.color }]} />
                   <View style={styles.optionTextWrap}>
                     <AppText style={styles.optionTitle}>{provider.providerName}</AppText>
@@ -138,6 +159,9 @@ const styles = StyleSheet.create({
   optionRowSelected: {
     backgroundColor: '#1b1422',
     borderColor: theme.colors.primary,
+  },
+  optionRowPending: {
+    opacity: 0.72,
   },
   optionDot: {
     width: 14,

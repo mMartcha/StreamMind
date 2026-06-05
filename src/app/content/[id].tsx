@@ -28,8 +28,9 @@ import {
 } from "@/src/services/api";
 import {
   UserStreamingProvider,
+  hydrateSubscribedUserStreamings,
   useSubscribedUserStreamings,
-} from "@/src/services/user-streamings.mock";
+} from "@/src/services/user-streamings";
 import { theme } from "@/theme";
 
 const userListActions: {
@@ -157,6 +158,10 @@ export default function ContentDetailsScreen() {
   );
   const [error, setError] = useState<string | null>(null);
   const routeInfo = useMemo(() => parseContentRouteId(id), [id]);
+
+  useEffect(() => {
+    void hydrateSubscribedUserStreamings();
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
