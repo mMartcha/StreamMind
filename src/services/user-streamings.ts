@@ -27,6 +27,9 @@ let selectedProviderIds = new Set<number>(defaultProviderIds);
 let selectedProvidersSnapshot = buildSelectedProvidersSnapshot();
 const listeners = new Set<() => void>();
 let hydratePromise: Promise<void> | null = null;
+let stateVersion = 0;
+let persistVersion = 0;
+let remotePersistTimer: ReturnType<typeof setTimeout> | null = null;
 
 function buildSelectedProvidersSnapshot() {
   return userStreamingOptions.filter((provider) => selectedProviderIds.has(provider.providerId));
@@ -69,18 +72,41 @@ function parseStoredProviderIds(value: string | null) {
 function updateSubscribedUserStreamings(providerIds: number[]) {
   selectedProviderIds = new Set(providerIds);
   selectedProvidersSnapshot = buildSelectedProvidersSnapshot();
+  stateVersion += 1;
   emitChange();
 }
 
-async function persistSubscribedUserStreamings(providerIds: number[]) {
-  await AsyncStorage.setItem(USER_STREAMINGS_STORAGE_KEY, JSON.stringify(providerIds));
+function saveSubscribedUserStreamingsLocally(providerIds: number[]) {
+  void AsyncStorage.setItem(USER_STREAMINGS_STORAGE_KEY, JSON.stringify(providerIds));
+}
 
+function scheduleRemotePersist(providerIds: number[]) {
+  persistVersion += 1;
+  const currentPersistVersion = persistVersion;
+
+  if (remotePersistTimer) {
+    clearTimeout(remotePersistTimer);
+  }
+
+  remotePersistTimer = setTimeout(() => {
+    void persistSubscribedUserStreamingsRemotely(providerIds, currentPersistVersion);
+  }, 350);
+}
+
+async function persistSubscribedUserStreamingsRemotely(
+  providerIds: number[],
+  currentPersistVersion: number,
+) {
   try {
     const streamings = await request<UserStreamingProvider[]>('/user-streamings', {
       method: 'PUT',
       body: JSON.stringify({ providerIds }),
     });
     const remoteProviderIds = streamings.map((provider) => provider.providerId);
+
+    if (currentPersistVersion !== persistVersion) {
+      return;
+    }
 
     await AsyncStorage.setItem(USER_STREAMINGS_STORAGE_KEY, JSON.stringify(remoteProviderIds));
     updateSubscribedUserStreamings(remoteProviderIds);
@@ -104,8 +130,13 @@ export async function hydrateSubscribedUserStreamings() {
     }
 
     try {
+      const versionBeforeRemoteLoad = stateVersion;
       const streamings = await request<UserStreamingProvider[]>('/user-streamings');
       const remoteProviderIds = streamings.map((provider) => provider.providerId);
+
+      if (versionBeforeRemoteLoad !== stateVersion) {
+        return;
+      }
 
       await AsyncStorage.setItem(USER_STREAMINGS_STORAGE_KEY, JSON.stringify(remoteProviderIds));
       updateSubscribedUserStreamings(remoteProviderIds);
@@ -116,15 +147,17 @@ export async function hydrateSubscribedUserStreamings() {
     }
   })();
 
-  return hydratePromise;
+  await hydratePromise;
+  hydratePromise = null;
 }
 
-export async function setSubscribedUserStreamings(providerIds: number[]) {
+export function setSubscribedUserStreamings(providerIds: number[]) {
   updateSubscribedUserStreamings(providerIds);
-  await persistSubscribedUserStreamings(providerIds);
+  saveSubscribedUserStreamingsLocally(providerIds);
+  scheduleRemotePersist(providerIds);
 }
 
-export async function toggleSubscribedUserStreaming(providerId: number) {
+export function toggleSubscribedUserStreaming(providerId: number) {
   const nextSelectedProviderIds = new Set(selectedProviderIds);
 
   if (nextSelectedProviderIds.has(providerId)) {
@@ -133,7 +166,7 @@ export async function toggleSubscribedUserStreaming(providerId: number) {
     nextSelectedProviderIds.add(providerId);
   }
 
-  await setSubscribedUserStreamings([...nextSelectedProviderIds]);
+  setSubscribedUserStreamings([...nextSelectedProviderIds]);
 }
 
 export function useSubscribedUserStreamings() {

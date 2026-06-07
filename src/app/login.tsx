@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Link, useRouter } from 'expo-router';
+import { Link } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, TextInput, View } from 'react-native';
 
@@ -8,7 +8,6 @@ import { useAuth } from '@/src/contexts/AuthContext';
 import { theme } from '@/theme';
 
 export default function LoginScreen() {
-  const router = useRouter();
   const { signIn } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -21,7 +20,6 @@ export default function LoginScreen() {
       setIsSubmitting(true);
       setError(null);
       await signIn(email.trim(), password);
-      router.replace('/(tabs)');
     } catch {
       setError('Email ou senha invalidos.');
     } finally {

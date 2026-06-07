@@ -1,7 +1,6 @@
 import { useFonts } from 'expo-font';
-import { Stack, useRouter, useSegments } from 'expo-router';
+import { Redirect, Stack, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -37,25 +36,9 @@ export default function RootLayout() {
 
 function RootNavigator() {
   const { isAuthenticated, isLoading } = useAuth();
-  const router = useRouter();
   const segments = useSegments();
   const currentRoute = segments[0];
   const isAuthRoute = currentRoute === 'login' || currentRoute === 'register';
-
-  useEffect(() => {
-    if (isLoading) {
-      return;
-    }
-
-    if (!isAuthenticated && !isAuthRoute) {
-      router.replace('/login');
-      return;
-    }
-
-    if (isAuthenticated && isAuthRoute) {
-      router.replace('/(tabs)');
-    }
-  }, [isAuthenticated, isAuthRoute, isLoading, router]);
 
   if (isLoading) {
     return (
@@ -63,6 +46,14 @@ function RootNavigator() {
         <ActivityIndicator color={theme.colors.primary} />
       </View>
     );
+  }
+
+  if (!isAuthenticated && !isAuthRoute) {
+    return <Redirect href="/login" />;
+  }
+
+  if (isAuthenticated && isAuthRoute) {
+    return <Redirect href="/(tabs)" />;
   }
 
   return (

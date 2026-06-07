@@ -18,7 +18,9 @@ export function HeroCard({ item }: { item: ContentItem }) {
       <View style={styles.heroContent}>
         <AppText style={styles.heroEyebrow}>Destaque do dia</AppText>
         <AppText style={styles.heroTitle}>{item.title}</AppText>
-        <AppText style={styles.heroDescription}>{item.shortSynopsis}</AppText>
+        <AppText numberOfLines={5} ellipsizeMode="tail" style={styles.heroDescription}>
+          {item.shortSynopsis}
+        </AppText>
         <View style={styles.heroInfoRow}>
           <AppText style={styles.heroInfo}>{item.year}</AppText>
           <AppText style={styles.heroInfo}>{item.duration}</AppText>

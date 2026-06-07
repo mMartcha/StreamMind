@@ -2,8 +2,14 @@ import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
 import { Image } from "expo-image";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Animated,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AppText, HorizontalRail, SectionHeader } from "@/src/components";
@@ -62,6 +68,8 @@ const userListActions: {
     inactiveIcon: "checkmark-circle-outline",
   },
 ];
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 type UserListState = Record<UserTitleStatus, UserTitleItem | null>;
 type StreamingProviderWithSubscription = StreamingProvider & {
@@ -399,34 +407,13 @@ export default function ContentDetailsScreen() {
                   const isPending = pendingStatus === action.status;
 
                   return (
-                    <Pressable
+                    <UserListActionButton
                       key={action.status}
-                      disabled={Boolean(pendingStatus)}
+                      action={action}
+                      isActive={isActive}
+                      isPending={isPending}
                       onPress={() => toggleUserListStatus(action.status)}
-                      style={[
-                        styles.actionButton,
-                        isActive && styles.actionButtonActive,
-                        isPending && styles.actionButtonPending,
-                      ]}
-                    >
-                      <Ionicons
-                        name={isActive ? action.icon : action.inactiveIcon}
-                        size={18}
-                        color={isActive ? "#111" : theme.colors.text}
-                      />
-                      <AppText
-                        style={[
-                          styles.actionText,
-                          isActive && styles.actionTextActive,
-                        ]}
-                      >
-                        {isPending
-                          ? "..."
-                          : isActive
-                            ? action.activeLabel
-                            : action.label}
-                      </AppText>
-                    </Pressable>
+                    />
                   );
                 })}
               </View>
@@ -466,6 +453,76 @@ export default function ContentDetailsScreen() {
         </View>
       </ScrollView>
     </>
+  );
+}
+
+function UserListActionButton({
+  action,
+  isActive,
+  isPending,
+  onPress,
+}: {
+  action: (typeof userListActions)[number];
+  isActive: boolean;
+  isPending: boolean;
+  onPress: () => void;
+}) {
+  const pulse = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (!isPending) {
+      pulse.stopAnimation();
+      pulse.setValue(0);
+      return;
+    }
+
+    const animation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulse, {
+          toValue: 1,
+          duration: 520,
+          useNativeDriver: false,
+        }),
+        Animated.timing(pulse, {
+          toValue: 0,
+          duration: 520,
+          useNativeDriver: false,
+        }),
+      ]),
+    );
+
+    animation.start();
+
+    return () => {
+      animation.stop();
+    };
+  }, [isPending, pulse]);
+
+  const pendingBorderColor = pulse.interpolate({
+    inputRange: [0, 1],
+    outputRange: [theme.colors.primary, theme.colors.primarySoft],
+  });
+
+  return (
+    <AnimatedPressable
+      disabled={isPending}
+      onPress={onPress}
+      style={[
+        styles.actionButton,
+        isActive && styles.actionButtonActive,
+        isPending && styles.actionButtonPending,
+        isPending && { borderColor: pendingBorderColor },
+      ]}
+    >
+      <Ionicons
+        name={isActive ? action.icon : action.inactiveIcon}
+        size={18}
+        color={isActive ? "#111" : theme.colors.text}
+      />
+      <AppText style={[styles.actionText, isActive && styles.actionTextActive]}>
+        {isActive ? action.activeLabel : action.label}
+      </AppText>
+    </AnimatedPressable>
   );
 }
 
@@ -592,7 +649,9 @@ const styles = StyleSheet.create({
   actionButton: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     gap: 8,
+    minWidth: 132,
     borderRadius: theme.radius.pill,
     borderWidth: 1,
     borderColor: theme.colors.border,

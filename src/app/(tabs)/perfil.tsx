@@ -1,19 +1,24 @@
-import { Ionicons } from '@expo/vector-icons';
-import { useFocusEffect } from '@react-navigation/native';
-import { useRouter } from 'expo-router';
-import { useCallback, useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Ionicons } from "@expo/vector-icons";
+import { useFocusEffect } from "@react-navigation/native";
+import { useRouter } from "expo-router";
+import { useCallback, useState } from "react";
+import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
 
-import { AppText, Chip, PosterCard, Screen, SectionHeader } from '@/src/components';
-import { useAuth } from '@/src/contexts/AuthContext';
+import {
+  AppText,
+  PosterCard,
+  Screen,
+  SectionHeader
+} from "@/src/components";
+import { useAuth } from "@/src/contexts/AuthContext";
 import {
   CatalogContentItem,
   UserListStats,
   getUserListStats,
   getUserLists,
   toContentItemFromUserList,
-} from '@/src/services/api';
-import { theme } from '@/theme';
+} from "@/src/services/api";
+import { theme } from "@/theme";
 
 const emptyStats: UserListStats = {
   favorites: 0,
@@ -21,12 +26,24 @@ const emptyStats: UserListStats = {
   watched: 0,
 };
 
+let cachedProfileData: {
+  stats: UserListStats;
+  watchLater: CatalogContentItem[];
+} | null = null;
+
 export default function ProfileScreen() {
   const router = useRouter();
   const { user, signOut } = useAuth();
-  const [stats, setStats] = useState<UserListStats>(emptyStats);
-  const [watchLater, setWatchLater] = useState<CatalogContentItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [stats, setStats] = useState<UserListStats>(
+    cachedProfileData?.stats ?? emptyStats,
+  );
+  const [watchLater, setWatchLater] = useState<CatalogContentItem[]>(
+    cachedProfileData?.watchLater ?? [],
+  );
+  const [hasLoadedProfile, setHasLoadedProfile] = useState(
+    Boolean(cachedProfileData),
+  );
+  const [isLoading, setIsLoading] = useState(!cachedProfileData);
   const [error, setError] = useState<string | null>(null);
 
   useFocusEffect(
@@ -35,26 +52,35 @@ export default function ProfileScreen() {
 
       async function loadProfileLists() {
         try {
-          setIsLoading(true);
+          setIsLoading(!hasLoadedProfile);
           setError(null);
 
           const [statsResult, watchlistResult] = await Promise.all([
             getUserListStats(),
-            getUserLists('WATCHLIST'),
+            getUserLists("WATCHLIST"),
           ]);
 
           if (isActive) {
+            const nextWatchLater = watchlistResult.map(toContentItemFromUserList);
+
+            cachedProfileData = {
+              stats: statsResult,
+              watchLater: nextWatchLater,
+            };
             setStats(statsResult);
-            setWatchLater(watchlistResult.map(toContentItemFromUserList));
+            setWatchLater(nextWatchLater);
           }
         } catch {
           if (isActive) {
-            setStats(emptyStats);
-            setWatchLater([]);
-            setError('Não foi possível carregar os dados do perfil agora.');
+            if (!hasLoadedProfile) {
+              setStats(emptyStats);
+              setWatchLater([]);
+            }
+            setError("Não foi possível carregar os dados do perfil agora.");
           }
         } finally {
           if (isActive) {
+            setHasLoadedProfile(true);
             setIsLoading(false);
           }
         }
@@ -65,20 +91,21 @@ export default function ProfileScreen() {
       return () => {
         isActive = false;
       };
-    }, []),
+    }, [hasLoadedProfile]),
   );
 
   async function handleSignOut() {
     await signOut();
-    router.replace('/login');
   }
 
-  const initials = user?.name
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join('') || 'SM';
+  const initials =
+    user?.name
+      .split(" ")
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase())
+      .join("") || "SM";
+  const shouldShowInitialLoading = isLoading && !hasLoadedProfile;
 
   return (
     <Screen>
@@ -92,48 +119,59 @@ export default function ProfileScreen() {
           <AppText style={styles.avatarText}>{initials}</AppText>
         </View>
         <View style={styles.heroText}>
-          <AppText style={styles.name}>{user?.name ?? 'Usuario'}</AppText>
-          <AppText style={styles.caption}>{user?.email ?? 'Sessao ativa no StreamMind.'}</AppText>
+          <AppText style={styles.name}>{user?.name ?? "Usuario"}</AppText>
+          <AppText style={styles.caption}>
+            {user?.email ?? "Sessao ativa no StreamMind."}
+          </AppText>
         </View>
       </View>
 
-      <Pressable onPress={() => router.push('/streamings')} style={styles.streamingButton}>
+      <Pressable
+        onPress={() => router.push("/streamings")}
+        style={styles.streamingButton}
+      >
         <View style={styles.streamingButtonTextWrap}>
           <AppText style={styles.streamingButtonTitle}>Meus streamings</AppText>
           <AppText style={styles.streamingButtonCaption}>
             Escolha os serviços que você assina para personalizar as sugestões.
           </AppText>
         </View>
-        <Ionicons name="chevron-forward" size={20} color={theme.colors.primarySoft} />
+        <Ionicons
+          name="chevron-forward"
+          size={20}
+          color={theme.colors.primarySoft}
+        />
       </Pressable>
 
       <Pressable onPress={handleSignOut} style={styles.logoutButton}>
-        <Ionicons name="log-out-outline" size={18} color={theme.colors.danger} />
+        <Ionicons
+          name="log-out-outline"
+          size={18}
+          color={theme.colors.danger}
+        />
         <AppText style={styles.logoutText}>Sair da conta</AppText>
       </Pressable>
 
+      {shouldShowInitialLoading ? (
+        <View style={styles.profileDataLoading}>
+          <ActivityIndicator color={theme.colors.primarySoft} />
+        </View>
+      ) : (
+        <>
       <View style={styles.statsRow}>
         <StatCard label="Assistidos" value={String(stats.watched)} />
         <StatCard label="Favoritos" value={String(stats.favorites)} />
         <StatCard label="Depois" value={String(stats.watchlist)} />
       </View>
 
-      {isLoading && <AppText style={styles.feedback}>Carregando perfil...</AppText>}
       {error && <AppText style={styles.feedback}>{error}</AppText>}
 
       <View style={styles.section}>
-        <AppText style={styles.label}>Preferências de gênero</AppText>
-        <View style={styles.tagRow}>
-          {['Ficção Científica', 'Suspense', 'Drama', 'Família'].map((genre) => (
-            <Chip key={genre} label={genre} active />
-          ))}
-        </View>
-      </View>
-
-      <View style={styles.section}>
         <AppText style={styles.label}>Assistir depois</AppText>
-        {!isLoading && !error && watchLater.length === 0 && (
-          <AppText style={styles.feedback}>Nenhum título salvo para depois.</AppText>
+        {!error && watchLater.length === 0 && (
+          <AppText style={styles.feedback}>
+            Nenhum título salvo para depois.
+          </AppText>
         )}
         <View style={styles.list}>
           {watchLater.map((item) => (
@@ -141,6 +179,8 @@ export default function ProfileScreen() {
           ))}
         </View>
       </View>
+        </>
+      )}
     </Screen>
   );
 }
@@ -156,19 +196,19 @@ function StatCard({ label, value }: { label: string; value: string }) {
 
 const styles = StyleSheet.create({
   hero: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 14,
   },
   avatar: {
     width: 70,
     height: 70,
     borderRadius: 35,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#271539',
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#271539",
     borderWidth: 1,
-    borderColor: '#8A2BE244',
+    borderColor: "#8A2BE244",
   },
   avatarText: {
     color: theme.colors.text,
@@ -190,14 +230,14 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   streamingButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     gap: 12,
-    backgroundColor: '#1b1422',
+    backgroundColor: "#1b1422",
     borderRadius: theme.radius.xl,
     borderWidth: 1,
-    borderColor: '#8A2BE255',
+    borderColor: "#8A2BE255",
     padding: theme.spacing.lg,
   },
   streamingButtonTextWrap: {
@@ -215,13 +255,13 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   logoutButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     gap: 8,
     borderRadius: theme.radius.pill,
     borderWidth: 1,
-    borderColor: '#ff7d9044',
+    borderColor: "#ff7d9044",
     paddingVertical: 12,
   },
   logoutText: {
@@ -230,7 +270,7 @@ const styles = StyleSheet.create({
     fontFamily: theme.fonts.family.semibold,
   },
   statsRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 12,
   },
   statCard: {
@@ -246,14 +286,13 @@ const styles = StyleSheet.create({
     color: theme.colors.primarySoft,
     fontSize: theme.fonts.xl,
     fontFamily: theme.fonts.family.bold,
-    textAlign:'center'
+    textAlign: "center",
   },
   statLabel: {
     color: theme.colors.textMuted,
     fontSize: theme.fonts.sm,
     fontFamily: theme.fonts.family.medium,
-    textAlign:'center'
-    
+    textAlign: "center",
   },
   section: {
     gap: 12,
@@ -264,12 +303,18 @@ const styles = StyleSheet.create({
     fontFamily: theme.fonts.family.semibold,
   },
   tagRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: 10,
   },
   list: {
     gap: theme.spacing.md,
+  },
+  profileDataLoading: {
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 220,
+    paddingVertical: theme.spacing.xxl,
   },
   feedback: {
     color: theme.colors.textMuted,

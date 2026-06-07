@@ -1,6 +1,6 @@
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
 
 import { AppText, PosterCard, Screen, SectionHeader } from "@/src/components";
 import {
@@ -13,6 +13,7 @@ import { theme } from "@/theme";
 export default function FavoritesScreen() {
   const [favorites, setFavorites] = useState<CatalogContentItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasLoadedFavorites, setHasLoadedFavorites] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useFocusEffect(
@@ -21,7 +22,7 @@ export default function FavoritesScreen() {
 
       async function loadFavorites() {
         try {
-          setIsLoading(true);
+          setIsLoading(!hasLoadedFavorites);
           setError(null);
 
           const data = await getUserLists("FAVORITE");
@@ -36,6 +37,7 @@ export default function FavoritesScreen() {
           }
         } finally {
           if (isActive) {
+            setHasLoadedFavorites(true);
             setIsLoading(false);
           }
         }
@@ -46,8 +48,10 @@ export default function FavoritesScreen() {
       return () => {
         isActive = false;
       };
-    }, []),
+    }, [hasLoadedFavorites]),
   );
+
+  const shouldShowInitialLoading = isLoading && !hasLoadedFavorites;
 
   return (
     <Screen>
@@ -56,11 +60,13 @@ export default function FavoritesScreen() {
         subtitle="Sua seleção pessoal, com foco rápido em disponibilidade nas plataformas."
       />
 
-      {isLoading && (
-        <AppText style={styles.feedback}>Carregando favoritos...</AppText>
+      {shouldShowInitialLoading && (
+        <View style={styles.loadingWrap}>
+          <ActivityIndicator color={theme.colors.primarySoft} />
+        </View>
       )}
       {error && <AppText style={styles.feedback}>{error}</AppText>}
-      {!isLoading && !error && favorites.length === 0 && (
+      {!shouldShowInitialLoading && !error && favorites.length === 0 && (
         <AppText style={styles.feedback}>Nenhum favorito salvo ainda.</AppText>
       )}
 
@@ -94,6 +100,11 @@ const styles = StyleSheet.create({
   },
   list: {
     gap: theme.spacing.md,
+  },
+  loadingWrap: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: theme.spacing.xl,
   },
   feedback: {
     color: theme.colors.textMuted,

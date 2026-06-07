@@ -314,13 +314,14 @@ export default function AIScreen() {
                   />
                 </View>
                 <AppText style={styles.resultTitle}>
-                  Recomendações da IA
+                  Recomendações do StreamMate
                 </AppText>
               </View>
 
               <AppText style={styles.resultText}>
-                Com base nos títulos escolhidos e no gênero selecionado, a IA
-                encontrou sugestões reais do catálogo para você assistir.
+                Com base nos títulos escolhidos e no gênero selecionado, o
+                StreamMate encontrou sugestões reais do catálogo para você
+                assistir.
               </AppText>
 
               <View style={styles.recommendationList}>
@@ -407,7 +408,10 @@ export default function AIScreen() {
         transparent
         onRequestClose={closeRecommendationModal}
       >
-        <Pressable style={styles.modalOverlay} onPress={closeRecommendationModal}>
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={closeRecommendationModal}
+        >
           <Pressable
             onPress={(event) => event.stopPropagation()}
             style={[

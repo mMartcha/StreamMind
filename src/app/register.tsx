@@ -1,4 +1,4 @@
-import { Link, useRouter } from 'expo-router';
+import { Link } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, TextInput, View } from 'react-native';
 
@@ -7,7 +7,6 @@ import { useAuth } from '@/src/contexts/AuthContext';
 import { theme } from '@/theme';
 
 export default function RegisterScreen() {
-  const router = useRouter();
   const { signUp } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -20,7 +19,6 @@ export default function RegisterScreen() {
       setIsSubmitting(true);
       setError(null);
       await signUp(name.trim(), email.trim(), password);
-      router.replace('/(tabs)');
     } catch {
       setError('Não foi possível criar sua conta.');
     } finally {
