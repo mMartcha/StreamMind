@@ -1,7 +1,7 @@
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from "react-native";
 
-import { theme } from '@/theme';
-import { AppText } from './AppText';
+import { theme } from "@/theme";
+import { AppText } from "./AppText";
 
 export function SectionHeader({
   title,
@@ -15,20 +15,22 @@ export function SectionHeader({
       <View style={styles.sectionHeader}>
         <AppText style={styles.sectionTitle}>{title}</AppText>
       </View>
-        {subtitle ? <AppText style={styles.sectionSubtitle}>{subtitle}</AppText> : null}
+      {subtitle ? (
+        <AppText style={styles.sectionSubtitle}>{subtitle}</AppText>
+      ) : null}
     </>
   );
 }
 
 const styles = StyleSheet.create({
   sectionHeader: {
-    gap: 6,
+    gap: theme.spacing.md,
+    backgroundColor: "#211828",
+    borderRadius: theme.radius.xl,
     borderWidth: 1,
-    borderRadius: theme.radius.lg,
-    padding: theme.spacing.sm,
-    borderColor: theme.colors.primarySoft,
-    backgroundColor: theme.colors.surfaceGlass,
-    alignItems:'center'
+    borderColor: "#8A2BE244",
+    padding: theme.spacing.lg,
+    alignItems: "center",
   },
   sectionTitle: {
     color: theme.colors.text,
@@ -38,6 +40,5 @@ const styles = StyleSheet.create({
   sectionSubtitle: {
     color: theme.colors.textMuted,
     fontSize: theme.fonts.sm,
-    
   },
 });
