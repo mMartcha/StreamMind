@@ -6,8 +6,25 @@ import { ContentItem } from "@/src/data/content";
 export const AUTH_TOKEN_STORAGE_KEY = "@streammind:auth_token";
 export const AUTH_USER_STORAGE_KEY = "@streammind:auth_user";
 
-export const API_BASE_URL =
-  process.env.EXPO_PUBLIC_API_BASE_URL ?? "http://10.0.2.2:3333";
+const LOCAL_API_BASE_URL = "http://10.0.2.2:3333";
+
+function resolveApiBaseUrl() {
+  const envApiBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL?.trim();
+
+  if (envApiBaseUrl) {
+    return envApiBaseUrl.replace(/\/+$/, "");
+  }
+
+  if (__DEV__) {
+    return LOCAL_API_BASE_URL;
+  }
+
+  throw new Error(
+    "EXPO_PUBLIC_API_BASE_URL não configurada. Configure a URL do backend no EAS antes de gerar a APK.",
+  );
+}
+
+export const API_BASE_URL = resolveApiBaseUrl();
 
 export const api = create({
   baseURL: API_BASE_URL,
@@ -231,7 +248,9 @@ export function toContentItem(
     item.mediaType === "movie" && "runtime" in item
       ? `${item.runtime} min`
       : item.mediaType === "tv" && "numberOfSeasons" in item
-        ? `${item.numberOfSeasons} temporada${item.numberOfSeasons === 1 ? "" : "s"}`
+        ? `${item.numberOfSeasons} temporada${
+            item.numberOfSeasons === 1 ? "" : "s"
+          }`
         : item.mediaType === "movie"
           ? "Filme"
           : "Serie";

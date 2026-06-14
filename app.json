@@ -20,7 +20,8 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.streammind"
+      "package": "com.marcello.streammind",
+      "versionCode": 1
     },
     "web": {
       "output": "static",
@@ -44,6 +45,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "a7d2a1cf-37d6-4db7-8a6f-91afc8af9da1"
+      }
     }
   }
 }
